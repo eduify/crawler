@@ -56,11 +56,10 @@ foreach($Division_arr as $Division_Name => $Division_Value)
                // $delay =  rand(3, 5);
 //                sleep($delay);
 
+                echo $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name&demoKey=null&purpose=browse";
                 echo "Memory Usage = ".memory_get_usage()/(1024*1024) . "MB \n\n\n";
-               
-                    $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name&demoKey=null&purpose=browse";
-                    //header("location: $FinalUrl");
-                   
+
+                
             } // Section
 
         } // Course
