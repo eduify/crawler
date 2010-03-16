@@ -9,7 +9,7 @@ function MainBookData($url,$initial_csv_row_data){
     $ul  = $html->find('div[id=material_results] ul');
     $output = fopen('c:\scrap\book_data.csv', 'w');
     // Header for csv
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Author(s),Detailed Link,Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 
    // CHeck whether Material Exists
