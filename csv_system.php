@@ -44,7 +44,11 @@ function MainBookData($url,$initial_csv_row_data,&$output){
             }// for
         }
 
-   } // if
+   }else{
+       // If no book is found still add the record
+       echo $row_data = "$initial_csv_row_data,,,,,,,,\n";
+       fwrite($output, $row_data);
+   }
    unset($html);
    unset($ul);
    
@@ -191,12 +195,12 @@ $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Ti
 
                     $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
                     
-				$initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
+		    $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                     
-                   // MainBookData($FinalUrl,$initial_csv_row_data,$output);
+                    MainBookData($FinalUrl,$initial_csv_row_data,$output);
  // $delay =  rand(3, 5);
     //                sleep($delay);
-                    echo 
+                     
 					echo "\n";
                     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
