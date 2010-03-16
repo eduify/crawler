@@ -49,6 +49,8 @@ function MainBookData($url,$initial_csv_row_data,&$output){
        echo $row_data = "$initial_csv_row_data,,,,,,,,\n";
        fwrite($output, $row_data);
    }
+   $html->__destruct();
+
    unset($html);
    unset($ul);
    
@@ -86,6 +88,7 @@ function SisterSiteData($sister_url){
     $ISBN_13_Digital = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',9)->children[1]->plaintext;
     $ISBN_13_Digital = trim($ISBN_13_Digital);
 
+    $html->__destruct();
     unset($html);
     return "$sister_url,$Edition,$Publisher,$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital";
 }
