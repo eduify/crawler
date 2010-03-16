@@ -21,7 +21,10 @@ function MainBookData($url){
                   echo "$BookTitle <br /> $SisterUrl <br /><br />";
                   $Main_Data['title'] = $BookTitle;
                   $Main_Data['detail_url'] = $SisterUrl;
-                  
+                  // Clearing Space
+                  unset($BookTitle);
+                  unset($SisterUrl);
+
                   
             }// for
         }
@@ -33,7 +36,7 @@ function MainBookData($url){
     $url= "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=Graduate%20School%20of%20Business&departmentDisplayName=BUS&courseDisplayName=GSB%20101&sectionDisplayName=01&demoKey=null&purpose=browse";
     // URL short Books
     $url = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=Stanford&departmentDisplayName=CHEM&courseDisplayName=130&sectionDisplayName=01&demoKey=d&purpose=browse";
-
+MainBookData($url);
 
 ?>
 
