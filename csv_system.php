@@ -1,16 +1,15 @@
 <?php
 include_once("library/simple_html_dom.php");
 
-function MainBookData($url,$initial_csv_row_data){
+function MainBookData($url,$initial_csv_row_data,&$output){
     include_once("library/simple_html_dom.php");
     $Main_Data = "";
     $html = file_get_dom($url);
     
     $ul  = $html->find('div[id=material_results] ul');
-    $output = fopen('c:\scrap\book_data.csv', 'w');
+    
     // Header for csv
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
-    fwrite($output, $row_data);
+    
 
    // CHeck whether Material Exists
     if($ul != null){
@@ -29,17 +28,17 @@ function MainBookData($url,$initial_csv_row_data){
                     $sister_site_data = ",,,,,,";
                 }
                  
-                   
-                  $Main_Data['detail_url'] = $SisterUrl;
-
-                  echo $row_data = "$initial_csv_row_data,$BookTitle,$SisterUrl,$sister_site_data";
+                  
+                  echo $row_data = "$initial_csv_row_data,$BookTitle,$SisterUrl,$sister_site_data\n";
                   echo "\n";
-
+				  
                   fwrite($output, $row_data);
 
                   // Clearing Space
                   unset($BookTitle);
                   unset($SisterUrl);
+                  unset($row_data);
+                  
 
 
             }// for
@@ -47,12 +46,14 @@ function MainBookData($url,$initial_csv_row_data){
 
    } // if
    unset($html);
-   fclose($output);
+   unset($ul);
+   
+   
 }
 //--------------------------------------------------------------------------------------------------------
 function SisterSiteData($sister_url){
     include_once("library/simple_html_dom.php");
-    $url = "http://www.cafescribe.com/index.php?option=com_virtuemart&page=shop.product_details&flypage=shop.flypage&isbn13=9780495114789&storeid=670 ";
+    $url = $sister_url;
     $html = file_get_dom($url);
     $ListPrice  = $html->find('div[id=bodycenter] table td',0)->children[2]->children[1]->plaintext;
     $ListPrice = trim($ListPrice);
@@ -136,12 +137,14 @@ function checkFile($file_name){
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function ProcessDataDigging($csv_file){
+function ProcessDataDigging(){
 	//xdebug_start_trace();
 
    
-
-
+	$output = fopen('c:\scrap\book_data.csv', 'w');
+$row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    fwrite($output, $row_data);
+	
     $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=562&termId=100014525&_=");
     $Division_arr = str_replace("<script>parent.doneLoaded('", "", $Division_arr);
     $Division_arr = str_replace("')</script>", "", $Division_arr);
@@ -169,6 +172,7 @@ function ProcessDataDigging($csv_file){
 
             $Course_arr = json_decode($Course_arr,true);
             $Course_arr = $Course_arr['data'][0];
+			
             foreach($Course_arr as $Course_Name => $Course_Value)
             {
                 $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
@@ -181,16 +185,19 @@ function ProcessDataDigging($csv_file){
                 $Section_arr = $Section_arr['data'][0];
                 foreach($Section_arr as $Section_Name => $Section_Value)
                 {
-
+					$Section_Name_url = str_replace(" ", "%20", $Section_Name); 
                    // $delay =  rand(3, 5);
     //                sleep($delay);
 
-                    $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name&demoKey=null&purpose=browse";
-                    $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name_url,$Department_Name_url,$Course_Name_url,$Section_Name,$FinalUrl";
+                    $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
                     
-                    MainBookData($FinalUrl,$initial_csv_row_data);
-
-                    echo "\n";
+				$initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
+                    
+                   // MainBookData($FinalUrl,$initial_csv_row_data,$output);
+ // $delay =  rand(3, 5);
+    //                sleep($delay);
+                    echo 
+					echo "\n";
                     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
 
@@ -203,7 +210,7 @@ function ProcessDataDigging($csv_file){
     } // Divisions
 
     
-		
+	fclose($output);		
 	//xdebug_stop_trace();
 }
 //------------------------------------------------------------------------------------
@@ -248,7 +255,7 @@ function ProcessDataDigging($csv_file){
 			
 }*/
  	
-ProcessDataDigging("c:\scrap\scraper.csv");	
+ProcessDataDigging();	
 
 
 ?>
