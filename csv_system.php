@@ -47,7 +47,7 @@ function MainBookData($url,$initial_csv_row_data){
 
    } // if
    unset($html);
-
+   fclose($output);
 }
 //--------------------------------------------------------------------------------------------------------
 function SisterSiteData($sister_url){
@@ -202,7 +202,7 @@ function ProcessDataDigging($csv_file){
        
     } // Divisions
 
-    fclose($output);
+    
 		
 	//xdebug_stop_trace();
 }
