@@ -19,6 +19,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
             $total_books = count($ul[$j]->children);  // count($ul[$j]->children) This will give us Amount of books
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $ul[$j]->children[$i]->find('span[class=wrap]', 0)->plaintext ;
+            
 
                 $SisterUrl_Ancher = $ul[$j]->children[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
@@ -29,11 +30,11 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 }
                  
                   
-                  echo $row_data = "$initial_csv_row_data,$BookTitle,$SisterUrl,$sister_site_data\n";
+                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",$SisterUrl,$sister_site_data\n";
                   echo "\n";
 				  
                   fwrite($output, $row_data);
-
+                  
                   // Clearing Space
                   unset($BookTitle);
                   unset($SisterUrl);
@@ -90,7 +91,7 @@ function SisterSiteData($sister_url){
 
     $html->__destruct();
     unset($html);
-    return "$sister_url,$Edition,$Publisher,$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital";
+    return "$Author,$Edition,$Publisher,$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital";
 }
 
 //--------------------------------------------------------------------------------------------------------
