@@ -15,7 +15,8 @@ include_once("library/simple_html_dom.php");
    
         for($i=0;$i<$total_books; $i++){
              $BookTitle = $ul[0]->children[$i]->find('span[class=wrap]', 0)->plaintext ;
-             echo $ul[0]->children[$i]->find('div[id=field] a', 0)->outertext ;
+            // echo $ul[0]->children[$i]->find('div[id=field] a', 0)->outertext ;
+             echo $ul[0]->children[$i]->find('div[id=field] a', 0)->getAttribute("href") ;
              
             //echo $BookTitle."<br />";
         }// for
