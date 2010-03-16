@@ -68,7 +68,7 @@ function SisterSiteData($sister_url){
     return "$sister_url,$Edition,$Publisher,$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital";
 }
 
-
+//--------------------------------------------------------------------------------------------------------
 function getOptions(){
 	echo "\n\nEnter 1: CSV File full path with name: \n";
 	echo "Enter 2: Process CSV File: \n";
@@ -122,38 +122,16 @@ function checkFile($file_name){
 function ProcessDataDigging($csv_file){
 	//xdebug_start_trace();
 
-        $output = fopen('c:\scrap\output.csv', 'w');
-        fwrite($output, $row_data);
+    $output = fopen('c:\scrap\book_data.csv', 'w');
+    fwrite($output, $row_data);
 
-        
-        
-        fclose($output);
+    
+
+    fclose($output);
 		
 	//xdebug_stop_trace();
 }
 //------------------------------------------------------------------------------------
-function GetMap_fromHtmlSelect(&$category_map){
-    /**
-     * There are two options
-     * We will get all the data and put it into array
-     * Example $data['division']['Department']['course']
-     */
-
-    /*
-     *--------------------- First We will get Programs
-     */
-    $url = "";
-    $return
-
-    /*
-     * -----------------------------------------------------------------
-     *
-     */
-
-    
-    
-}
-
 //------------------------------------------------------------------------------------
 
 
@@ -196,6 +174,6 @@ function GetMap_fromHtmlSelect(&$category_map){
 }*/
  	
 ProcessDataDigging("c:\scrap\scraper.csv");	
-GetMap_fromHtmlSelect()
+
 
 ?>
