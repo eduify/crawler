@@ -29,7 +29,6 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                     $sister_site_data = ",,,,,,";
                 }
                  
-                  
                   echo $row_data = "$initial_csv_row_data,\"$BookTitle\",$SisterUrl,$sister_site_data\n";
                   echo "\n";
 				  
@@ -91,7 +90,7 @@ function SisterSiteData($sister_url){
 
     $html->__destruct();
     unset($html);
-    return "$Author,$Edition,$Publisher,$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital";
+    return "\"$Author\",$Edition,\"$Publisher\",$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital,$ListPrice,$YouPayPrice";
 }
 
 //--------------------------------------------------------------------------------------------------------
