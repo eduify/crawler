@@ -16,12 +16,13 @@ function MainBookData($url,$initial_csv_row_data,&$output){
         $total_type_books = count($ul);               // Counting type of books
         for($j=0;$j < $total_type_books; $j++){
 
-            $total_books = count($ul[$j]->children);  // count($ul[$j]->children) This will give us Amount of books
-            for($i=0;$i<$total_books; $i++){
-                $BookTitle = $ul[$j]->children[$i]->find('span[class=wrap]', 0)->plaintext ;
-            
+            $all_li = $ul[$j]->find('li');
+            $total_books =  count($all_li); //This will give us Amount of books
 
-                $SisterUrl_Ancher = $ul[$j]->children[$i]->find('div[id=field] a', 0);
+            for($i=0;$i<$total_books; $i++){
+                $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
+
+                $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
                     $SisterUrl = $SisterUrl_Ancher->getAttribute("href") ;
                     $sister_site_data = SisterSiteData($SisterUrl);
