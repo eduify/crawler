@@ -148,12 +148,14 @@ function checkFile($file_name){
 function ProcessDataDigging(){
 	//xdebug_start_trace();
 
+    $ProgramID = "562";
+    $TermID = "100014525";
    
-	$output = fopen('c:\scrap\book_data.csv', 'w');
-$row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $output = fopen('c:\scrap\book_data.csv', 'w');
+    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
-    $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=562&termId=100014525&_=");
+    $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=$ProgramID&termId=$TermID&_=");
     $Division_arr = str_replace("<script>parent.doneLoaded('", "", $Division_arr);
     $Division_arr = str_replace("')</script>", "", $Division_arr);
 
@@ -164,7 +166,7 @@ $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Ti
     {
         $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
 
-        $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=10161&programId=562&termId=100014525&divisionName=$Division_Name_url&_=");
+        $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=10161&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&_=");
         $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
         $Department_arr = str_replace("')</script>", "", $Department_arr);
 
@@ -174,7 +176,7 @@ $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Ti
         {
             $Department_Name_url = str_replace(" ", "%20", $Department_Name);   // Corrects The URL Data, removes spaces
 
-            $Course_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=COURSES&storeId=10161&programId=562&termId=100014525&divisionName=$Division_Name_url&departmentName=$Department_Name_url&_=");
+            $Course_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=COURSES&storeId=10161&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&departmentName=$Department_Name_url&_=");
             $Course_arr = str_replace("<script>parent.doneLoaded('", "", $Course_arr);
             $Course_arr = str_replace("')</script>", "", $Course_arr);
 
@@ -185,7 +187,7 @@ $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Ti
             {
                 $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
 
-                $Section_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=SECTIONS&storeId=10161&programId=562&termId=100014525&divisionName=$Division_Name_url&departmentName=$Department_Name_url&courseName=$Course_Name_url&_=");
+                $Section_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=SECTIONS&storeId=10161&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&departmentName=$Department_Name_url&courseName=$Course_Name_url&_=");
                 $Section_arr = str_replace("<script>parent.doneLoaded('", "", $Section_arr);
                 $Section_arr = str_replace("')</script>", "", $Section_arr);
 
@@ -197,7 +199,7 @@ $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Ti
                    // $delay =  rand(3, 5);
     //                sleep($delay);
 
-                    $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
+                    $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=$ProgramID&termId=$TermID&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
                     
 		    $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                     
