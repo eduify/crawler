@@ -187,7 +187,7 @@ function SisterSiteData($sister_url){
 
 //--------------------------------------------------------------------------------------------------------
 function getOptions(){
-	echo "\n\nEnter 1: CSV File full path with name: \n";
+	echo "\n\nEnter 1: CSV Filename with Path (WIN32: c:\data.csv)(Linux: /data.csv): \n";
 	echo "Enter 2: Process CSV File: \n";
 	echo "Enter 3: Exit: \n";
 	$option = fgets(STDIN);
@@ -203,7 +203,7 @@ function get_file_extension($file_name)
 //------------------------------------------------------------------------------------
 function checkFile($file_name){
 	
-	if(file_exists($file_name)) {  	//  Check whether FIle Exists or Not
+	//if(file_exists($file_name)) {  	//  Check whether FIle Exists or Not
 		if(get_file_extension($file_name) <> "csv"){
 			echo "\n\n\n\n\n------------------------------------------------\n";
 			echo "------------------------------------------------\n";
@@ -222,27 +222,27 @@ function checkFile($file_name){
 			echo "------------------------------------------------\n";
 		}
 		return true;					
-	}else{
-			var_dump($file_name);
-			echo "\n\n\n\n\n------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "File Does Not Exist, Please check Path or File Name \n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			return false;
-	}	
+//	}else{
+//			var_dump($file_name);
+//			echo "\n\n\n\n\n------------------------------------------------\n";
+//			echo "------------------------------------------------\n";
+//			echo "------------------------------------------------\n";
+//			echo "File Does Not Exist, Please check Path or File Name \n";
+//			echo "------------------------------------------------\n";
+//			echo "------------------------------------------------\n";
+//			echo "------------------------------------------------\n";
+//			return false;
+//	}
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function ProcessDataDigging(){
+function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 	//xdebug_start_trace();
 
     $ProgramID = "562";
     $TermID = "100014525";
    
-    $output = fopen('c:\scrap\book_data.csv', 'w');
+    $output = fopen($file_name, 'w');
     $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
@@ -294,8 +294,6 @@ function ProcessDataDigging(){
                     $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                     MainBookData($FinalUrl,$initial_csv_row_data,$output);
                     
-                    
-
                     echo "\n";
                     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
@@ -320,9 +318,9 @@ function ProcessDataDigging(){
 	$condition = true;
 	$option = "";
 	$file_name = "";
-        $category_map = array();
+      
 	// --------------------------------------------------
-	/* while($condition){
+	while($condition){
 		switch($option){
 			case "":
 				$option = getOptions();           // General Options 
@@ -352,9 +350,9 @@ function ProcessDataDigging(){
 			break;
 		}
 			
-}*/
+}
  	
-ProcessDataDigging();	
+//ProcessDataDigging();
 
 
 ?>
