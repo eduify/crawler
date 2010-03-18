@@ -52,15 +52,20 @@ function MainBookData($url){
 
                 $Author = rtrim($Author);
                 $Edition = rtrim($Edition);
-                
-                // --- Data Cleaning ENDz
+
+                 $Bk_ISBN = split("/", $ImageUrl);
+                 $Bk_ISBN_count = count($Bk_ISBN) -1;
+                 $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
+                 $Bk_ISBN = explode('.', $Bk_ISBN);
+                 $Bk_ISBN = $Bk_ISBN[0];
+                 // --- Data Cleaning ENDz
 
 
                 $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
                     $SisterUrl = $SisterUrl_Ancher->getAttribute("href") ;
                 } // if
-                  echo "$i - $BookTitle - $Author - $Edition - $BK_UsedPrice - $BK_NewPrice - $BK_DigitalPrice - $ImageUrl <br /> $SisterUrl <br /><br />";
+                  echo "$i - $Bk_ISBN - $BookTitle - $Author - $Edition - $BK_UsedPrice - $BK_NewPrice - $BK_DigitalPrice - $ImageUrl <br /> $SisterUrl <br /><br />";
                   
                   // Clearing Space
                   unset($BookTitle);
@@ -71,7 +76,7 @@ function MainBookData($url){
                   unset($BK_UsedPrice);
                   unset($BK_NewPrice);
                   unset($BK_DigitalPrice);
-                  
+                  unset($Bk_ISBN);
                   
             }// for
         }
@@ -84,7 +89,7 @@ function MainBookData($url){
     // URL short Books
     $url = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=Stanford&departmentDisplayName=CHEM&courseDisplayName=130&sectionDisplayName=01&demoKey=d&purpose=browse";
 
-$url = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=Graduate%20School%20of%20Business&departmentDisplayName=BUS&courseDisplayName=GSB%20101&sectionDisplayName=01&demoKey=d&purpose=browse";
+//$url = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=562&termId=100014525&divisionDisplayName=Graduate%20School%20of%20Business&departmentDisplayName=BUS&courseDisplayName=GSB%20101&sectionDisplayName=01&demoKey=d&purpose=browse";
 
     MainBookData($url);
 

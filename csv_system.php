@@ -57,6 +57,8 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 $BookTitle = htmlspecialchars_decode($BookTitle);
                 
                 $ImageUrl = $all_li[$i]->find('img', 0)->getAttribute("src");
+                
+
 
                 if($all_li[$i]->find('div[class=field]', 1)->plaintext != ""){
                     $BK_UsedPrice = $all_li[$i]->find('div[class=field]', 1)->find('span[class=emph]', 0)->plaintext;
@@ -108,8 +110,14 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                         $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
 
                      }
+                     $Bk_ISBN = split("/", $ImageUrl);
+                     $Bk_ISBN_count = count($Bk_ISBN) -1;
+                     $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
+                     $Bk_ISBN = explode('.', $Bk_ISBN);
+                     $Bk_ISBN = $Bk_ISBN[0];
+                     
                 }
-                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
+                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
                   echo "\n";
 				  
                   fwrite($output, $row_data);
@@ -123,6 +131,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                   unset($BK_UsedPrice);
                   unset($BK_NewPrice);
                   unset($BK_DigitalPrice);
+                  unset($Bk_ISBN);
                   unset($row_data);
 
                   unset($amazon);
@@ -243,7 +252,7 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
     $TermID = "100014525";
    
     $output = fopen($file_name, 'w');
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,BK ISBN,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
     $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=$ProgramID&termId=$TermID&_=");
