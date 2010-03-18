@@ -17,13 +17,23 @@ function MainBookData($url){
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
 
+                $AuthorEdition = $all_li[$i]->find('div[class=detail]', 0)->plaintext ;
+                $AuthorEdition = split("Edition", $AuthorEdition);
+
+                // Data Cleaning for Author and Edition
+                $Author = $AuthorEdition[0];
+                $Edition = $AuthorEdition[1];
+                $Author = str_replace("Author:", "", $Author);
+                $Edition = str_replace(":", "", $Edition);
+                // --- Data Cleaning ENDz
+
+
                 $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
                     $SisterUrl = $SisterUrl_Ancher->getAttribute("href") ;
                 } // if
-                  echo "$i - $BookTitle <br /> $SisterUrl <br /><br />";
-                  $Main_Data['title'] = $BookTitle;
-                  $Main_Data['detail_url'] = $SisterUrl;
+                  echo "$i - $BookTitle - $Author - $Edition <br /> $SisterUrl <br /><br />";
+                  
                   // Clearing Space
                   unset($BookTitle);
                   unset($SisterUrl);

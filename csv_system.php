@@ -22,6 +22,15 @@ function MainBookData($url,$initial_csv_row_data,&$output){
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
 
+                $AuthorEdition = $all_li[$i]->find('div[class=detail]', 0)->plaintext ;
+                $AuthorEdition = split("Edition", $AuthorEdition);
+
+                // Data Cleaning for Author and Edition
+                $Author = $AuthorEdition[0];
+                $Edition = $AuthorEdition[1];
+                $Author = str_replace("Author:", "", $Author);
+                $Edition = str_replace(":", "", $Edition);
+                // --- Data Cleaning ENDz
                 $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
                     $SisterUrl = $SisterUrl_Ancher->getAttribute("href") ;
@@ -30,7 +39,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                     $sister_site_data = ",,,,,,";
                 }
                  
-                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",$SisterUrl,$sister_site_data\n";
+                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$SisterUrl,$sister_site_data\n";
                   echo "\n";
 				  
                   fwrite($output, $row_data);
@@ -152,7 +161,7 @@ function ProcessDataDigging(){
     $TermID = "100014525";
    
     $output = fopen('c:\scrap\book_data.csv', 'w');
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
     $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=$ProgramID&termId=$TermID&_=");
