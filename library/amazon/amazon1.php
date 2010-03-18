@@ -7,6 +7,7 @@ Function getAmazonData($SearchPhrase){
     $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";
     $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
 
+    
    
     if ($pxml === False)
     {
@@ -25,6 +26,7 @@ Function getAmazonData($SearchPhrase){
       $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
       $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
       $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+      $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
       return $Amazon;
     } // Else
    }// Else
@@ -32,11 +34,9 @@ Function getAmazonData($SearchPhrase){
 }
 
 
-       // $am =  getAmazonData("CSS Cookbook, 3rd Edition");
-        $am =  getAmazonData("Financial Reporting & Analysis, 4th");
-        
+        $am =  getAmazonData("Guide to Presentations,  Munter, 2nd");
+       var_dump($am);
 
-        var_dump($am);
 
 
 ?>
