@@ -1,6 +1,39 @@
 <?php
 include_once("library/simple_html_dom.php");
 
+Function getAmazonData($SearchPhrase){
+    include_once("library/amazon/aws_signed_request.php");
+
+    $public_key = "AKIAIRPU52XIPOIZS5OA";
+    $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";
+    $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
+
+
+    if ($pxml === False)
+    {
+        return false;
+        // Problem in accessing AMAZON API
+
+    }
+   else
+   {
+    if($pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice == ""){
+
+        return false;
+
+    }else {
+      $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
+      $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
+      $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
+      $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+      $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+      
+      return $Amazon;
+    } // Else
+   }// Else
+
+}
+
 function MainBookData($url,$initial_csv_row_data,&$output){
     include_once("library/simple_html_dom.php");
     $Main_Data = "";
@@ -65,8 +98,18 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 } else{
                     $sister_site_data = ",,,,,,";
                 }
-                 
-                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$SisterUrl,$sister_site_data\n";
+                if($ImageUrl <> "http://images.efollett.com/books/noBookImage.gif"){  // ONly Access Amazon Api if you image FOund
+                    $amazon = getAmazonData("$BookTitle, $Author, $Edition");
+                    if($amazon){
+                        $AmazonListPrice = $amazon['AmazonListPrice'] ;
+                        $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
+                        $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
+                        $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
+                        $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
+
+                     }
+                }
+                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
                   echo "\n";
 				  
                   fwrite($output, $row_data);
@@ -81,6 +124,13 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                   unset($BK_NewPrice);
                   unset($BK_DigitalPrice);
                   unset($row_data);
+
+                  unset($amazon);
+                  unset($AmazonListPrice) ;
+                  unset($NonAmazonNewPrice) ;
+                  unset($NonAmazonUsedPrice)  ;
+                  unset($AmazonDiscountPrice) ;
+                  unset($AmazonDetailPageURL) ;
 
 
             }// for
@@ -193,7 +243,7 @@ function ProcessDataDigging(){
     $TermID = "100014525";
    
     $output = fopen('c:\scrap\book_data.csv', 'w');
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
     $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=$ProgramID&termId=$TermID&_=");
@@ -236,19 +286,17 @@ function ProcessDataDigging(){
                 $Section_arr = $Section_arr['data'][0];
                 foreach($Section_arr as $Section_Name => $Section_Value)
                 {
-					$Section_Name_url = str_replace(" ", "%20", $Section_Name); 
+                    $Section_Name_url = str_replace(" ", "%20", $Section_Name);
                    // $delay =  rand(3, 5);
     //                sleep($delay);
 
                     $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=10161&langId=-1&programId=$ProgramID&termId=$TermID&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
-                    
-		    $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
-                    
+                    $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                     MainBookData($FinalUrl,$initial_csv_row_data,$output);
- // $delay =  rand(3, 5);
-    //                sleep($delay);
-                     
-					echo "\n";
+                    
+                    
+
+                    echo "\n";
                     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
 
