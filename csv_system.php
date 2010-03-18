@@ -30,6 +30,16 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 $Edition = $AuthorEdition[1];
                 $Author = str_replace("Author:", "", $Author);
                 $Edition = str_replace(":", "", $Edition);
+
+                $Author = str_replace("\n", "", $Author);
+                $Edition = str_replace("\n", "", $Edition);
+
+                $Author = ltrim($Author);
+                $Edition = ltrim($Edition);
+
+                $Author = rtrim($Author);
+                $Edition = rtrim($Edition);
+                
                 // --- Data Cleaning ENDz
                 $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available

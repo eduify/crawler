@@ -25,6 +25,16 @@ function MainBookData($url){
                 $Edition = $AuthorEdition[1];
                 $Author = str_replace("Author:", "", $Author);
                 $Edition = str_replace(":", "", $Edition);
+                
+                $Author = str_replace("\n", "", $Author);
+                $Edition = str_replace("\n", "", $Edition);
+
+                $Author = ltrim($Author);
+                $Edition = ltrim($Edition);
+
+                $Author = rtrim($Author);
+                $Edition = rtrim($Edition);
+                
                 // --- Data Cleaning ENDz
 
 
