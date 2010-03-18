@@ -101,6 +101,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                     $sister_site_data = ",,,,,,";
                 }
                 if($ImageUrl <> "http://images.efollett.com/books/noBookImage.gif"){  // ONly Access Amazon Api if you image FOund
+                if($ImageUrl <> "http://images.efollett.com/booksnull"){
                     $amazon = getAmazonData("$BookTitle, $Author, $Edition");
                     if($amazon){
                         $AmazonListPrice = $amazon['AmazonListPrice'] ;
@@ -116,6 +117,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                      $Bk_ISBN = explode('.', $Bk_ISBN);
                      $Bk_ISBN = $Bk_ISBN[0];
                      
+                }
                 }
                   echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
                   echo "\n";
