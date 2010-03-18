@@ -248,24 +248,17 @@ function checkFile($file_name){
 function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 	//xdebug_start_trace();
 
-    $ProgramID = "562";
-    $TermID = "100014525";
-    $StoreId = "10161";
+    $ProgramID = "647";
+    $TermID = "100013708";
+    $StoreId = "10742";
 
     $output = fopen($file_name, 'w');
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,BK ISBN,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $row_data = "Program,Term,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,BK ISBN,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
-    $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&_=");
-    $Division_arr = str_replace("<script>parent.doneLoaded('", "", $Division_arr);
-    $Division_arr = str_replace("')</script>", "", $Division_arr);
-
-    $Division_arr = json_decode($Division_arr,true);
-    $Division_arr = $Division_arr['data'][0];
     
 
-    foreach($Division_arr as $Division_Name => $Division_Value)
-    {
+        $Division_Name = " ";
         $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
         
         $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&_=");
@@ -302,7 +295,7 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
     //                sleep($delay);
 
                     $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$StoreId&langId=-1&programId=$ProgramID&termId=$TermID&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
-                    $initial_csv_row_data = "Stanford University,Winter 2009-2010,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
+                    $initial_csv_row_data = "Univ Of Illinois - Champaign,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                     MainBookData($FinalUrl,$initial_csv_row_data,$output);
                     
                     echo "\n";
@@ -315,7 +308,7 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
             
         } // Department
        
-    } // Divisions
+   
 
     
 	fclose($output);		
