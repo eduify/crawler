@@ -16,6 +16,7 @@ function MainBookData($url){
 
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
+                $BookTitle = htmlspecialchars_decode($BookTitle);
 
                 $ImageUrl = $all_li[$i]->find('img', 0)->getAttribute("src");
 

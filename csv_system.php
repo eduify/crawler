@@ -21,7 +21,8 @@ function MainBookData($url,$initial_csv_row_data,&$output){
 
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
-
+                $BookTitle = htmlspecialchars_decode($BookTitle);
+                
                 $ImageUrl = $all_li[$i]->find('img', 0)->getAttribute("src");
 
                 if($all_li[$i]->find('div[class=field]', 1)->plaintext != ""){
@@ -53,6 +54,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 $Edition = ltrim($Edition);
 
                 $Author = rtrim($Author);
+                $Author = htmlspecialchars_decode($Author);
                 $Edition = rtrim($Edition);
                 
                 // --- Data Cleaning ENDz
