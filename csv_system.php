@@ -314,6 +314,7 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 //------------------------------------------------------------------------------------
 
 
+
 	// ----------- Varibales Initilization --------------
 	$condition = true;
 	$option = "";
