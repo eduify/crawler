@@ -22,6 +22,21 @@ function MainBookData($url,$initial_csv_row_data,&$output){
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
 
+                $ImageUrl = $all_li[$i]->find('img', 0)->getAttribute("src");
+
+                if($all_li[$i]->find('div[class=field]', 1)->plaintext != ""){
+                    $BK_UsedPrice = $all_li[$i]->find('div[class=field]', 1)->find('span[class=emph]', 0)->plaintext;
+                }
+
+                if($all_li[$i]->find('div[class=field]', 2)->plaintext != ""){
+                    $BK_NewPrice = $all_li[$i]->find('div[class=field]', 2)->find('span[class=emph]', 0)->plaintext;
+                }
+
+                if($all_li[$i]->find('div[id=field]', 0)->plaintext != ""){
+                    $BK_DigitalPrice = $all_li[$i]->find('div[id=field]', 0)->find('span[class=emph]', 0)->plaintext;
+                }
+                
+                
                 $AuthorEdition = $all_li[$i]->find('div[class=detail]', 0)->plaintext ;
                 $AuthorEdition = split("Edition", $AuthorEdition);
 
@@ -49,7 +64,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                     $sister_site_data = ",,,,,,";
                 }
                  
-                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$SisterUrl,$sister_site_data\n";
+                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$SisterUrl,$sister_site_data\n";
                   echo "\n";
 				  
                   fwrite($output, $row_data);
@@ -57,8 +72,13 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                   // Clearing Space
                   unset($BookTitle);
                   unset($SisterUrl);
+                  unset($Author);
+                  unset($Edition);
+                  unset($ImageUrl);
+                  unset($BK_UsedPrice);
+                  unset($BK_NewPrice);
+                  unset($BK_DigitalPrice);
                   unset($row_data);
-                  
 
 
             }// for
@@ -171,7 +191,7 @@ function ProcessDataDigging(){
     $TermID = "100014525";
    
     $output = fopen('c:\scrap\book_data.csv', 'w');
-    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
+    $row_data = "Program,Term,Division ,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
 	
     $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=10161&programId=$ProgramID&termId=$TermID&_=");
@@ -184,7 +204,7 @@ function ProcessDataDigging(){
     foreach($Division_arr as $Division_Name => $Division_Value)
     {
         $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
-
+        
         $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=10161&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&_=");
         $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
         $Department_arr = str_replace("')</script>", "", $Department_arr);
