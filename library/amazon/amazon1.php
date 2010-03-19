@@ -1,7 +1,7 @@
 <?php
 
 Function getAmazonData($SearchPhrase,$RequestType) {
-    include("aws_signed_request.php");
+    include_once("aws_signed_request.php");
 
     $public_key = "AKIAIRPU52XIPOIZS5OA";
     $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";

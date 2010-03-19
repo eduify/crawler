@@ -2,7 +2,7 @@
 include_once("library/simple_html_dom.php");
 
 Function getAmazonData($SearchPhrase,$RequestType) {
-    include("aws_signed_request.php");
+    include_once("library/amazon/aws_signed_request.php");
 
     $public_key = "AKIAIRPU52XIPOIZS5OA";
     $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";
