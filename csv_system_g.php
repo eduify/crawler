@@ -1,7 +1,7 @@
 <?php
 include_once("library/simple_html_dom.php");
 
-Function getAmazonData($SearchPhrase){
+Function getAmazonData($SearchPhrase) {
     include_once("library/amazon/aws_signed_request.php");
 
     $public_key = "AKIAIRPU52XIPOIZS5OA";
@@ -9,32 +9,30 @@ Function getAmazonData($SearchPhrase){
     $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
 
 
-    if ($pxml === False)
-    {
+    if ($pxml === False) {
         return false;
         // Problem in accessing AMAZON API
 
     }
-   else
-   {
-    if($pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice == ""){
+    else {
+        if($pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice == "") {
 
-        return false;
+            return false;
 
-    }else {
-      $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
-      $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
-      $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
-      $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
-      $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+        }else {
+            $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
+            $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
+            $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
+            $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+            $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
 
-      return $Amazon;
-    } // Else
-   }// Else
+            return $Amazon;
+        } // Else
+    }// Else
 
 }
 
-function MainBookData($url,$initial_csv_row_data,&$output){
+function MainBookData($url,$initial_csv_row_data,&$output) {
     include_once("library/simple_html_dom.php");
     $Main_Data = "";
     $html = file_get_dom($url);
@@ -44,15 +42,15 @@ function MainBookData($url,$initial_csv_row_data,&$output){
     // Header for csv
 
 
-   // CHeck whether Material Exists
-    if($ul != null){
+    // CHeck whether Material Exists
+    if($ul != null) {
         $total_type_books = count($ul);               // Counting type of books
-        for($j=0;$j < $total_type_books; $j++){
+        for($j=0;$j < $total_type_books; $j++) {
 
             $all_li = $ul[$j]->find('li');
             $total_books =  count($all_li); //This will give us Amount of books
 
-            for($i=0;$i<$total_books; $i++){
+            for($i=0;$i<$total_books; $i++) {
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
                 $BookTitle = htmlspecialchars_decode($BookTitle);
 
@@ -60,15 +58,15 @@ function MainBookData($url,$initial_csv_row_data,&$output){
 
 
 
-                if($all_li[$i]->find('div[class=field]', 1)->plaintext != ""){
+                if($all_li[$i]->find('div[class=field]', 1)->plaintext != "") {
                     $BK_UsedPrice = $all_li[$i]->find('div[class=field]', 1)->find('span[class=emph]', 0)->plaintext;
                 }
 
-                if($all_li[$i]->find('div[class=field]', 2)->plaintext != ""){
+                if($all_li[$i]->find('div[class=field]', 2)->plaintext != "") {
                     $BK_NewPrice = $all_li[$i]->find('div[class=field]', 2)->find('span[class=emph]', 0)->plaintext;
                 }
 
-                if($all_li[$i]->find('div[id=field]', 0)->plaintext != ""){
+                if($all_li[$i]->find('div[id=field]', 0)->plaintext != "") {
                     $BK_DigitalPrice = $all_li[$i]->find('div[id=field]', 0)->find('span[class=emph]', 0)->plaintext;
                 }
 
@@ -94,73 +92,73 @@ function MainBookData($url,$initial_csv_row_data,&$output){
 
                 // --- Data Cleaning ENDz
                 $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
-                if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
+                if($SisterUrl_Ancher->plaintext != "") {                                   // Check if Sister URL is available
                     $SisterUrl = $SisterUrl_Ancher->getAttribute("href") ;
                     $sister_site_data = SisterSiteData($SisterUrl);
-                } else{
+                } else {
                     $sister_site_data = ",,,,,,";
                 }
-                if($ImageUrl <> "http://images.efollett.com/books/noBookImage.gif"){  // ONly Access Amazon Api if you image FOund
-                if($ImageUrl <> "http://images.efollett.com/booksnull"){
-                    $amazon = getAmazonData("$BookTitle, $Author, $Edition");
-                    if($amazon){
-                        $AmazonListPrice = $amazon['AmazonListPrice'] ;
-                        $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
-                        $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
-                        $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
-                        $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
+                if($ImageUrl <> "http://images.efollett.com/books/noBookImage.gif") {  // ONly Access Amazon Api if you image FOund
+                    if($ImageUrl <> "http://images.efollett.com/booksnull") {
+                        $amazon = getAmazonData("$BookTitle, $Author, $Edition");
+                        if($amazon) {
+                            $AmazonListPrice = $amazon['AmazonListPrice'] ;
+                            $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
+                            $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
+                            $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
+                            $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
 
-                     }
-                     $Bk_ISBN = split("/", $ImageUrl);
-                     $Bk_ISBN_count = count($Bk_ISBN) -1;
-                     $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
-                     $Bk_ISBN = explode('.', $Bk_ISBN);
-                     $Bk_ISBN = $Bk_ISBN[0];
+                        }
+                        $Bk_ISBN = split("/", $ImageUrl);
+                        $Bk_ISBN_count = count($Bk_ISBN) -1;
+                        $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
+                        $Bk_ISBN = explode('.', $Bk_ISBN);
+                        $Bk_ISBN = $Bk_ISBN[0];
 
+                    }
                 }
-                }
-                  echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
-                  echo "\n";
+                echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
+                echo "\n";
 
-                  fwrite($output, $row_data);
+                fwrite($output, $row_data);
 
-                  // Clearing Space
-                  unset($BookTitle);
-                  unset($SisterUrl);
-                  unset($Author);
-                  unset($Edition);
-                  unset($ImageUrl);
-                  unset($BK_UsedPrice);
-                  unset($BK_NewPrice);
-                  unset($BK_DigitalPrice);
-                  unset($Bk_ISBN);
-                  unset($row_data);
+                // Clearing Space
+                unset($BookTitle);
+                unset($SisterUrl);
+                unset($Author);
+                unset($Edition);
+                unset($ImageUrl);
+                unset($BK_UsedPrice);
+                unset($BK_NewPrice);
+                unset($BK_DigitalPrice);
+                unset($Bk_ISBN);
+                unset($row_data);
 
-                  unset($amazon);
-                  unset($AmazonListPrice) ;
-                  unset($NonAmazonNewPrice) ;
-                  unset($NonAmazonUsedPrice)  ;
-                  unset($AmazonDiscountPrice) ;
-                  unset($AmazonDetailPageURL) ;
+                unset($amazon);
+                unset($AmazonListPrice) ;
+                unset($NonAmazonNewPrice) ;
+                unset($NonAmazonUsedPrice)  ;
+                unset($AmazonDiscountPrice) ;
+                unset($AmazonDetailPageURL) ;
 
 
             }// for
         }
 
-   }else{
-       // If no book is found still add the record
-       echo $row_data = "$initial_csv_row_data,,,,,,,,\n";
-       fwrite($output, $row_data);
-   }
-   $html->__destruct();
+    }else {
+        // If no book is found still add the record
+        echo $row_data = "$initial_csv_row_data,,,,,,,,\n";
+        fwrite($output, $row_data);
+    }
+    $html->__destruct();
 
-   unset($html);
-   unset($ul);
+    unset($html);
+    unset($ul);
 
 
 }
 //--------------------------------------------------------------------------------------------------------
-function SisterSiteData($sister_url){
+function SisterSiteData($sister_url) {
     include_once("library/simple_html_dom.php");
     $url = $sister_url;
     $html = file_get_dom($url);
@@ -197,42 +195,121 @@ function SisterSiteData($sister_url){
 }
 
 //--------------------------------------------------------------------------------------------------------
-function getOptions(){
-	echo "\n\nEnter 1: CSV Filename with Path (WIN32: c:\data.csv)(Linux: /data.csv): \n";
-	echo "Enter 2: Process CSV File: \n";
-	echo "Enter 3: Exit: \n";
-	$option = fgets(STDIN);
-	return $option;
+function getOptions() {
+    echo "\n\nEnter 1: Print List of State \n";
+    echo "Enter 2: Process CSV File: \n";
+    echo "Enter 3: Exit: \n";
+    $option = fgets(STDIN);
+    return $option;
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function get_file_extension($file_name)
-{
-	return substr(strrchr($file_name,'.'),1);
-}
-//------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------
-function checkFile($file_name){
+function getState() {
+    $State_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=STATESK12&pageType=FLGStoreCatalogDisplay&pageSubType=K12&langId=-1&demoKey=d&stateUSK12IdSelect=");
+    $State_arr = str_replace("<script>parent.doneLoaded('", "", $State_arr);
+    $State_arr = str_replace("')</script>", "", $State_arr);
 
-	//if(file_exists($file_name)) {  	//  Check whether FIle Exists or Not
-		if(get_file_extension($file_name) <> "csv"){
-			echo "\n\n\n\n\n------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "\nPlease Enter CSV file\n ";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-		}else{
-			echo "\n\n\n\n\n------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "\nCSV File Exist, You can now Process File\n ";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-			echo "------------------------------------------------\n";
-		}
-		return true;
+    $state = array();
+
+    $State_arr = json_decode($State_arr,true);
+    $State_arr = $State_arr['data'][0];
+    foreach($State_arr as $State_Name => $State_Value) {
+        $counter++;
+        $state[$counter] = $State_Value;
+        echo "$counter - $State_Name \n" ;
+
+    }
+    echo "\n\nEnter #(state): Select State\n";
+    $selecttion = fgets(STDIN);
+    $selecttion = trim($selecttion); 		// Input from user and save it in a variable
+    $selecttion = str_replace("\n", '', $selecttion);
+    return $state[$selecttion];
+}
+//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
+function getStateUniversity($state) {
+    echo "\n\nPress Enter to Print University List for State $state\n";
+    $selecttion = fgets(STDIN);
+
+    $University_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=INSTITUTESUS&pageType=FLGStoreCatalogDisplay&pageSubType=US&langId=-1&demoKey=d&stateProvinceId=$state");
+    $University_arr = str_replace("<script>parent.doneLoaded('", "", $University_arr);
+    $University_arr = str_replace("')</script>", "", $University_arr);
+
+    $University = array();
+
+    $University_arr = json_decode($University_arr,true);
+    $University_arr = $University_arr['data'][0];
+    foreach($University_arr as $University_Name => $University_Value) {
+        $counter++;
+        $University[$counter] = $University_Value;
+        echo "$counter - $University_Name \n" ;
+
+    }
+    echo "\n\nEnter #(University): Select University in $state\n";
+    $selecttion = fgets(STDIN);
+    $selecttion = trim($selecttion); 		// Input from user and save it in a variable
+    $selecttion = str_replace("\n", '', $selecttion);
+    return $University[$selecttion];
+
+}
+
+//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
+function getCampusUniversity($University) {
+    echo "\n\nPress Enter to Print Campus List for University Selected\n";
+    $selecttion = fgets(STDIN);
+
+    $Campus_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=CAMPUSUS&pageType=FLGStoreCatalogDisplay&pageSubType=US&langId=-1&demoKey=d&institutionId=$University");
+    $Campus_arr = str_replace("<script>parent.doneLoaded('", "", $Campus_arr);
+    $Campus_arr = str_replace("')</script>", "", $Campus_arr);
+
+    $Campus = array();
+
+    $Campus_arr = json_decode($Campus_arr,true);
+    $Campus_arr = $Campus_arr['data'][0];
+    foreach($Campus_arr as $Campus_Name => $Campus_Value) {
+        $counter++;
+        $Campus[$counter] = $Campus_Value;
+        echo "$counter - $Campus_Name (Campus)\n" ;
+
+    }
+    echo "\n\nEnter #(Campus): Select Campus in University Selected\n";
+    $selecttion = fgets(STDIN);
+    $selecttion = trim($selecttion); 		// Input from user and save it in a variable
+    $selecttion = str_replace("\n", '', $selecttion);
+    return $Campus[$selecttion];
+
+}
+
+//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
+
+function get_file_extension($file_name) {
+    return substr(strrchr($file_name,'.'),1);
+}
+//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
+function checkFile($file_name) {
+
+    //if(file_exists($file_name)) {  	//  Check whether FIle Exists or Not
+    if(get_file_extension($file_name) <> "csv") {
+        echo "\n\n\n\n\n------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+        echo "\nPlease Enter CSV file\n ";
+        echo "------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+    }else {
+        echo "\n\n\n\n\n------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+        echo "\nCSV File Exist, You can now Process File\n ";
+        echo "------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+        echo "------------------------------------------------\n";
+    }
+    return true;
 //	}else{
 //			var_dump($file_name);
 //			echo "\n\n\n\n\n------------------------------------------------\n";
@@ -247,8 +324,8 @@ function checkFile($file_name){
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
-	//xdebug_start_trace();
+function ProcessDataDigging($file_name = "c:\scrap\book_data.csv") {
+    //xdebug_start_trace();
 
     $ProgramID = "647";
     $TermID = "100013708";
@@ -260,102 +337,101 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 
 
 
-        $Division_Name = " ";
-        $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
+    $Division_Name = " ";
+    $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
 
-        $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&_=");
-        $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
-        $Department_arr = str_replace("')</script>", "", $Department_arr);
+    $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&_=");
+    $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
+    $Department_arr = str_replace("')</script>", "", $Department_arr);
 
-        $Department_arr = json_decode($Department_arr,true);
-        $Department_arr = $Department_arr['data'][0];
-        foreach($Department_arr as $Department_Name => $Department_Value)
-        {
-            $Department_Name_url = str_replace(" ", "%20", $Department_Name);   // Corrects The URL Data, removes spaces
+    $Department_arr = json_decode($Department_arr,true);
+    $Department_arr = $Department_arr['data'][0];
+    foreach($Department_arr as $Department_Name => $Department_Value) {
+        $Department_Name_url = str_replace(" ", "%20", $Department_Name);   // Corrects The URL Data, removes spaces
 
-            $Course_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=COURSES&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&departmentName=$Department_Name_url&_=");
-            $Course_arr = str_replace("<script>parent.doneLoaded('", "", $Course_arr);
-            $Course_arr = str_replace("')</script>", "", $Course_arr);
+        $Course_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=COURSES&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&departmentName=$Department_Name_url&_=");
+        $Course_arr = str_replace("<script>parent.doneLoaded('", "", $Course_arr);
+        $Course_arr = str_replace("')</script>", "", $Course_arr);
 
-            $Course_arr = json_decode($Course_arr,true);
-            $Course_arr = $Course_arr['data'][0];
+        $Course_arr = json_decode($Course_arr,true);
+        $Course_arr = $Course_arr['data'][0];
 
-            foreach($Course_arr as $Course_Name => $Course_Value)
-            {
-                $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
+        foreach($Course_arr as $Course_Name => $Course_Value) {
+            $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
 
-                $Section_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=SECTIONS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&departmentName=$Department_Name_url&courseName=$Course_Name_url&_=");
-                $Section_arr = str_replace("<script>parent.doneLoaded('", "", $Section_arr);
-                $Section_arr = str_replace("')</script>", "", $Section_arr);
+            $Section_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=SECTIONS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&departmentName=$Department_Name_url&courseName=$Course_Name_url&_=");
+            $Section_arr = str_replace("<script>parent.doneLoaded('", "", $Section_arr);
+            $Section_arr = str_replace("')</script>", "", $Section_arr);
 
-                $Section_arr = json_decode($Section_arr,true);
-                $Section_arr = $Section_arr['data'][0];
-                foreach($Section_arr as $Section_Name => $Section_Value)
-                {
-                    $Section_Name_url = str_replace(" ", "%20", $Section_Name);
-                   // $delay =  rand(3, 5);
-    //                sleep($delay);
+            $Section_arr = json_decode($Section_arr,true);
+            $Section_arr = $Section_arr['data'][0];
+            foreach($Section_arr as $Section_Name => $Section_Value) {
+                $Section_Name_url = str_replace(" ", "%20", $Section_Name);
+                // $delay =  rand(3, 5);
+                //                sleep($delay);
 
-                    $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$StoreId&langId=-1&programId=$ProgramID&termId=$TermID&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
-                    $initial_csv_row_data = "Univ Of Illinois - Champaign,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
-                    MainBookData($FinalUrl,$initial_csv_row_data,$output);
+                $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$StoreId&langId=-1&programId=$ProgramID&termId=$TermID&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
+                $initial_csv_row_data = "Univ Of Illinois - Champaign,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
+                MainBookData($FinalUrl,$initial_csv_row_data,$output);
 
-                    echo "\n";
-                    echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
+                echo "\n";
+                echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
 
-                } // Section
+            } // Section
 
-            } // Course
+        } // Course
 
-        } // Department
+    } // Department
 
 
 
 
-	fclose($output);
-	//xdebug_stop_trace();
+    fclose($output);
+    //xdebug_stop_trace();
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 
 
 
-	// ----------- Varibales Initilization --------------
-	$condition = true;
-	$option = "";
-	$file_name = "";
+// ----------- Varibales Initilization --------------
+$condition = true;
+$option = "";
+$file_name = "";
+$state = "";
+$University = "";
+$Campus = "";
 
-	// --------------------------------------------------
-	while($condition){
-		switch($option){
-			case "":
-				$option = getOptions();           // General Options
-			break;
-			case 1:
-				echo "Enter CSV File full path with name HERE: ";
-				$file_name = trim(fgets(STDIN)); 		// Input from user and save it in a variable
-				$file_name = str_replace("\n", '', $file_name);   // Remove extra Line Entery
-				checkFile($file_name);		  	//  Check whether FIle Exists or Not
-				$option = getOptions();
-			break;
-			case 2:
-				if(checkFile($file_name)){
-					echo "Processsing File here \n\n\n";
-					//------------------- Start Processing File
-					ProcessDataDigging($file_name);
-				}else{
 
-				}
-				$option = getOptions(); 		// General Options
-			break;
-			case 3:
-				exit;
-			break;
-			default:
-				$option = getOptions();			// General Options
-			break;
-		}
+// --------------------------------------------------
+while($condition) {
+    switch($option) {
+        case "":
+            $option = getOptions();           // General Options
+            break;
+        case 1:
+            $state = getState();
+            $University = getStateUniversity($state);
+            echo $Campus = getCampusUniversity($University);
+            $option = getOptions();
+            break;
+        case 2:
+        //if(checkFile($file_name)) {
+            echo "Processsing File here \n\n\n";
+            //------------------- Start Processing File
+            //ProcessDataDigging($file_name);
+
+            //}
+            // $option = getOptions(); 		// General Options
+            break;
+        case 3:
+            exit;
+            break;
+        default:
+            $option = getOptions();			// General Options
+            break;
+    }
 
 }
 
