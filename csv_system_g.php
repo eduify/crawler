@@ -286,7 +286,7 @@ function getCampusUniversity($University) {
     $selecttion = str_replace("\n", '', $selecttion);
     $cam[0] = $Campus[$selecttion];
     $cam[1] = $Campus_name[$selecttion];
-    
+
     return $cam;
 
 }
@@ -350,7 +350,6 @@ function checkFile($file_name) {
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 function ProcessDataDigging_Generic($Store, $University_Name,$Campus_Name) {
-
     if(PHP_OS == "WINNT") {
         $file_name = "c:\\$University_Name($Campus_Name).csv";
     }else {
