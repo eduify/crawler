@@ -240,7 +240,8 @@ function getOptions() {
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 function getState() {
-    $State_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=STATESK12&pageType=FLGStoreCatalogDisplay&pageSubType=K12&langId=-1&demoKey=d&stateUSK12IdSelect=");
+
+    $State_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=STATESUS&pageType=FLGStoreCatalogDisplay&pageSubType=US&langId=-1&demoKey=d&stateUSAIdSelect=");
     $State_arr = str_replace("<script>parent.doneLoaded('", "", $State_arr);
     $State_arr = str_replace("')</script>", "", $State_arr);
 
@@ -248,6 +249,7 @@ function getState() {
 
     $State_arr = json_decode($State_arr,true);
     $State_arr = $State_arr['data'][0];
+    
     foreach($State_arr as $State_Name => $State_Value) {
         $counter++;
         $state[$counter] = $State_Value;
