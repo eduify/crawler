@@ -502,7 +502,7 @@ function ProcessDataDigging_Generic($Store, $University_Name,$Campus_Name) {
                             //                sleep($delay);
 
                             $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$Store&langId=-1&programId=$Program_Value&termId=$term_Value&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
-                            $initial_csv_row_data = "Univ Of Illinois - Champaign,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
+                            $initial_csv_row_data = "$Program_Name,$term_Name,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                             MainBookData($FinalUrl,$initial_csv_row_data,$output);
 
                             echo "\n";
