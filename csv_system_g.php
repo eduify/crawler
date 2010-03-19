@@ -281,6 +281,21 @@ function getCampusUniversity($University) {
 
 }
 
+
+function getBK_BOOKS_URL($campus) {
+
+    $Store_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?campusId=$campus&requestType=STOREDOMAIN&pageType=FLGStoreCatalogDisplay&langId=-1");
+    $Store_arr = str_replace("<script>parent.doneLoaded('", "", $Store_arr);
+    $Store_arr = str_replace("')</script>", "", $Store_arr);
+
+    $Store = array();
+
+    $Store_arr = json_decode($Store_arr,true);
+    $Store_arr = $Store_arr['data'][0];
+    $Store = $Store_arr[store];
+    $Store = "http://www.bkstr.com/CategoryDisplay/10001-9604-$Store-1?demoKey=d";
+    echo $Store;
+}
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 
@@ -413,7 +428,8 @@ while($condition) {
         case 1:
             $state = getState();
             $University = getStateUniversity($state);
-            echo $Campus = getCampusUniversity($University);
+            $Campus = getCampusUniversity($University);
+            getBK_BOOKS_URL($Campus);
             $option = getOptions();
             break;
         case 2:
