@@ -1,34 +1,61 @@
 <?php
 include_once("library/simple_html_dom.php");
 
-Function getAmazonData($SearchPhrase) {
+Function getAmazonData($SearchPhrase,$RequestType) {
     include_once("library/amazon/aws_signed_request.php");
 
     $public_key = "AKIAIRPU52XIPOIZS5OA";
     $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";
-    $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
 
-
-    if ($pxml === False) {
-        return false;
-        // Problem in accessing AMAZON API
-
-    }
-    else {
-        if($pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice == "") {
-
+    if($RequestType=="ItemLookup") {
+        $pxml = aws_signed_request("com", array("Operation"=>"ItemLookup","SearchIndex"=>"Books", "ItemId"=>"$SearchPhrase","IdType"=>"ISBN","ResponseGroup"=>"Large"), $public_key, $private_key);
+        if ($pxml === False) {
             return false;
+            // Problem in accessing AMAZON API
 
         }else {
-            $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
-            $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
-            $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
-            $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
-            $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
 
-            return $Amazon;
-        } // Else
-    }// Else
+            if($pxml->Items->Item->ASIN == "") {
+
+                return false;
+
+            }else {
+                $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
+                $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
+                $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
+                $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+                $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+                return $Amazon;
+            } // Else
+        }// Else
+
+    }else if($RequestType=="ItemSearch") {
+        $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
+
+        if ($pxml === False) {
+            return false;
+            // Problem in accessing AMAZON API
+
+        }else {
+
+            if($pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice == "") {
+
+                return false;
+
+            }else {
+                $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
+                $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
+                $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
+                $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+                $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+                return $Amazon;
+            } // Else
+        }// Else
+    }
+
+
+
+
 
 }
 
@@ -99,8 +126,21 @@ function MainBookData($url,$initial_csv_row_data,&$output) {
                     $sister_site_data = ",,,,,,";
                 }
                 if($ImageUrl <> "http://images.efollett.com/books/noBookImage.gif") {  // ONly Access Amazon Api if you image FOund
-                    if($ImageUrl <> "http://images.efollett.com/booksnull") {
-                        $amazon = getAmazonData("$BookTitle, $Author, $Edition");
+                    $Bk_ISBN = split("/", $ImageUrl);
+                    $Bk_ISBN_count = count($Bk_ISBN) -1;
+                    $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
+                    $Bk_ISBN = explode('.', $Bk_ISBN);
+                    $Bk_ISBN = $Bk_ISBN[0];
+                    $amazon = getAmazonData("$Bk_ISBN","ItemLookup");
+                    if($amazon) {
+                        $AmazonListPrice = $amazon['AmazonListPrice'] ;
+                        $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
+                        $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
+                        $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
+                        $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
+
+                    }else {
+                        $amazon = getAmazonData("$BookTitle, $Author, $Edition","ItemSearch");
                         if($amazon) {
                             $AmazonListPrice = $amazon['AmazonListPrice'] ;
                             $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
@@ -109,13 +149,8 @@ function MainBookData($url,$initial_csv_row_data,&$output) {
                             $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
 
                         }
-                        $Bk_ISBN = split("/", $ImageUrl);
-                        $Bk_ISBN_count = count($Bk_ISBN) -1;
-                        $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
-                        $Bk_ISBN = explode('.', $Bk_ISBN);
-                        $Bk_ISBN = $Bk_ISBN[0];
-
                     }
+
                 }
                 echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
                 echo "\n";
