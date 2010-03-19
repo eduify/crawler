@@ -269,12 +269,14 @@ function getCampusUniversity($University) {
     $Campus_arr = str_replace("')</script>", "", $Campus_arr);
 
     $Campus = array();
+    $Campus_name = array();
 
     $Campus_arr = json_decode($Campus_arr,true);
     $Campus_arr = $Campus_arr['data'][0];
     foreach($Campus_arr as $Campus_Name => $Campus_Value) {
         $counter++;
         $Campus[$counter] = $Campus_Value;
+        $Campus_name[$counter] = $Campus_Name;
         echo "$counter - $Campus_Name (Campus)\n" ;
 
     }
@@ -282,7 +284,10 @@ function getCampusUniversity($University) {
     $selecttion = fgets(STDIN);
     $selecttion = trim($selecttion); 		// Input from user and save it in a variable
     $selecttion = str_replace("\n", '', $selecttion);
-    return $Campus[$selecttion];
+    $cam[0] = $Campus[$selecttion];
+    $cam[1] = $Campus_name[$selecttion];
+    
+    return $cam;
 
 }
 
@@ -344,12 +349,12 @@ function checkFile($file_name) {
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function ProcessDataDigging_Generic($Store, $University_Name) {
+function ProcessDataDigging_Generic($Store, $University_Name,$Campus_Name) {
 
     if(PHP_OS == "WINNT") {
-        $file_name = "c:\\$University_Name.csv";
+        $file_name = "c:\\$University_Name($Campus_Name).csv";
     }else {
-        $file_name = "\\$University_Name.csv";
+        $file_name = "\\$University_Name($Campus_Name).csv";
     }
 
     $output = fopen($file_name, 'w');
@@ -514,7 +519,7 @@ while($condition) {
             $state = getState();
             $University = getStateUniversity($state);
             $Campus = getCampusUniversity($University[0]);
-            $Store = getBK_BOOKS_URL($Campus);
+            $Store = getBK_BOOKS_URL($Campus[0]);
 
             $option = getOptions();
             break;
@@ -523,7 +528,7 @@ while($condition) {
                 echo "Processsing File here \n\n\n";
                 //------------------- Start Processing File
                 //ProcessDataDigging($StoreUrl);
-                ProcessDataDigging_Generic($Store,$University[1]);
+                ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
             }
             $option = getOptions(); 		// General Options
             break;
