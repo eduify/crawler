@@ -27,7 +27,7 @@ Function getAmazonData($SearchPhrase){
       $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
       $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
       $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
-      
+
       return $Amazon;
     } // Else
    }// Else
@@ -38,11 +38,11 @@ function MainBookData($url,$initial_csv_row_data,&$output){
     include_once("library/simple_html_dom.php");
     $Main_Data = "";
     $html = file_get_dom($url);
-    
+
     $ul  = $html->find('div[id=material_results] ul');
-    
+
     // Header for csv
-    
+
 
    // CHeck whether Material Exists
     if($ul != null){
@@ -55,9 +55,9 @@ function MainBookData($url,$initial_csv_row_data,&$output){
             for($i=0;$i<$total_books; $i++){
                 $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
                 $BookTitle = htmlspecialchars_decode($BookTitle);
-                
+
                 $ImageUrl = $all_li[$i]->find('img', 0)->getAttribute("src");
-                
+
 
 
                 if($all_li[$i]->find('div[class=field]', 1)->plaintext != ""){
@@ -71,8 +71,8 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 if($all_li[$i]->find('div[id=field]', 0)->plaintext != ""){
                     $BK_DigitalPrice = $all_li[$i]->find('div[id=field]', 0)->find('span[class=emph]', 0)->plaintext;
                 }
-                
-                
+
+
                 $AuthorEdition = $all_li[$i]->find('div[class=detail]', 0)->plaintext ;
                 $AuthorEdition = split("Edition", $AuthorEdition);
 
@@ -91,7 +91,7 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                 $Author = rtrim($Author);
                 $Author = htmlspecialchars_decode($Author);
                 $Edition = rtrim($Edition);
-                
+
                 // --- Data Cleaning ENDz
                 $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
                 if($SisterUrl_Ancher->plaintext != ""){                                   // Check if Sister URL is available
@@ -116,14 +116,14 @@ function MainBookData($url,$initial_csv_row_data,&$output){
                      $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
                      $Bk_ISBN = explode('.', $Bk_ISBN);
                      $Bk_ISBN = $Bk_ISBN[0];
-                     
+
                 }
                 }
                   echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
                   echo "\n";
-				  
+
                   fwrite($output, $row_data);
-                  
+
                   // Clearing Space
                   unset($BookTitle);
                   unset($SisterUrl);
@@ -156,8 +156,8 @@ function MainBookData($url,$initial_csv_row_data,&$output){
 
    unset($html);
    unset($ul);
-   
-   
+
+
 }
 //--------------------------------------------------------------------------------------------------------
 function SisterSiteData($sister_url){
@@ -213,13 +213,13 @@ function get_file_extension($file_name)
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 function checkFile($file_name){
-	
+
 	//if(file_exists($file_name)) {  	//  Check whether FIle Exists or Not
 		if(get_file_extension($file_name) <> "csv"){
 			echo "\n\n\n\n\n------------------------------------------------\n";
 			echo "------------------------------------------------\n";
 			echo "------------------------------------------------\n";
-			echo "\nPlease Enter CSV file\n "; 
+			echo "\nPlease Enter CSV file\n ";
 			echo "------------------------------------------------\n";
 			echo "------------------------------------------------\n";
 			echo "------------------------------------------------\n";
@@ -232,7 +232,7 @@ function checkFile($file_name){
 			echo "------------------------------------------------\n";
 			echo "------------------------------------------------\n";
 		}
-		return true;					
+		return true;
 //	}else{
 //			var_dump($file_name);
 //			echo "\n\n\n\n\n------------------------------------------------\n";
@@ -257,12 +257,12 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
     $output = fopen($file_name, 'w');
     $row_data = "Program,Term,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,BK ISBN,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
     fwrite($output, $row_data);
-	
-    
+
+
 
         $Division_Name = " ";
         $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
-        
+
         $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=$StoreId&programId=$ProgramID&termId=$TermID&divisionName=$Division_Name_url&_=");
         $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
         $Department_arr = str_replace("')</script>", "", $Department_arr);
@@ -279,7 +279,7 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 
             $Course_arr = json_decode($Course_arr,true);
             $Course_arr = $Course_arr['data'][0];
-			
+
             foreach($Course_arr as $Course_Name => $Course_Value)
             {
                 $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
@@ -299,7 +299,7 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
                     $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$StoreId&langId=-1&programId=$ProgramID&termId=$TermID&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
                     $initial_csv_row_data = "Univ Of Illinois - Champaign,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
                     MainBookData($FinalUrl,$initial_csv_row_data,$output);
-                    
+
                     echo "\n";
                     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
@@ -307,13 +307,13 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
                 } // Section
 
             } // Course
-            
-        } // Department
-       
-   
 
-    
-	fclose($output);		
+        } // Department
+
+
+
+
+	fclose($output);
 	//xdebug_stop_trace();
 }
 //------------------------------------------------------------------------------------
@@ -325,12 +325,12 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 	$condition = true;
 	$option = "";
 	$file_name = "";
-      
+
 	// --------------------------------------------------
 	while($condition){
 		switch($option){
 			case "":
-				$option = getOptions();           // General Options 
+				$option = getOptions();           // General Options
 			break;
 			case 1:
 				echo "Enter CSV File full path with name HERE: ";
@@ -345,20 +345,20 @@ function ProcessDataDigging($file_name = "c:\scrap\book_data.csv"){
 					//------------------- Start Processing File
 					ProcessDataDigging($file_name);
 				}else{
-					
+
 				}
-				$option = getOptions(); 		// General Options 
+				$option = getOptions(); 		// General Options
 			break;
 			case 3:
 				exit;
 			break;
 			default:
-				$option = getOptions();			// General Options 
+				$option = getOptions();			// General Options
 			break;
 		}
-			
+
 }
- 	
+
 //ProcessDataDigging();
 
 
