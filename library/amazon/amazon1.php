@@ -5,6 +5,7 @@ Function getAmazonData($SearchPhrase){
    
     $public_key = "AKIAIRPU52XIPOIZS5OA";
     $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";
+    $pxml = aws_signed_request("com", array("Operation"=>"ItemLookup","ItemId"=>"B000X9FLKM","ResponseGroup"=>"Small"), $public_key, $private_key);
     $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
 
     
