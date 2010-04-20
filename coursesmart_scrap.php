@@ -61,11 +61,19 @@ Function getAmazonData($SearchPhrase,$RequestType) {
 
 function MainBookData(&$output) {
     include_once("library/simple_html_dom.php");
-    $Main_Data = "";
-   $url = "http://www.coursesmart.com/_ajax_searchresultsajax_1_390380?__sugus=561687168&action=2&__version=1.1.1&searchmode=&__className=search&view=book&xmlid=&page=1";
-   $html = file_get_dom($url);
-   echo $html;
-   // $ul  = $html->find('div[id=material_results] ul');
+
+    $url = "http://www.coursesmart.com/_ajax_searchresultsajax_1_390380?__sugus=191036118&action=2&__version=1.1.1&searchmode=&__className=search&view=book&xmlid=&page=1";
+    $html = file_get_dom($url);
+    $html = split("F9.Gk.Hu", $html);
+    $html = $html[1];
+    $html  = trim($html );
+// After cleaning Data Get the Object
+    $html = str_get_html($html);
+    echo "<code></code"
+   // echo $totalPages  = $html->find('div[id=tabcontents_sr]');
+    //var_dump($totalPages);
+
+// $ul  = $html->find('div[id=material_results] ul');
 
     $html->__destruct();
 
@@ -139,7 +147,7 @@ function ProcessDataDigging_Generic() {
     MainBookData($output);
     //fwrite($output, $row_data);
 
-    
+
     echo "\n";
     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
