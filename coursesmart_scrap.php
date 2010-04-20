@@ -136,6 +136,7 @@ function ProcessDataDigging_Generic() {
     $output = fopen($file_name, 'w');
     $row_data = "Program,Term,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,BK ISBN,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
 
+    MainBookData($output);
     //fwrite($output, $row_data);
 
     
@@ -158,47 +159,37 @@ $file_name = "";
 
 
 // --------------------------------------------------
-while($condition) {
-    switch($option) {
-        case "":
-            $option = getOptions();           // General Options
-            break;
-        case 1:
-
-            unset($state);
-            unset($University);
-            unset($Campus);
-            unset($StoreUrl);
-
-            $state = getState();
-            $University = getStateUniversity($state);
-            $Campus = getCampusUniversity($University[0]);
-            $Store = getBK_BOOKS_URL($Campus[0]);
-
-            $option = getOptions();
-            break;
-        case 2:
-            if($Store<> "") {
-                echo "Processsing File here \n\n\n";
-                //------------------- Start Processing File
-                //ProcessDataDigging($StoreUrl);
-                ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
-            }
-            $option = getOptions(); 		// General Options
-            break;
-        case 3:
-
-
-            exit;
-            break;
-        default:
-            $option = getOptions();			// General Options
-            break;
-    }
-
-}
+//while($condition) {
+//    switch($option) {
+//        case "":
+//            $option = getOptions();           // General Options
+//            break;
+//        case 1:
+//
+//            $option = getOptions();
+//            break;
+//        case 2:
+//            if($Store<> "") {
+//                echo "Processsing File here \n\n\n";
+//                //------------------- Start Processing File
+//
+//               // ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
+//            }
+//            $option = getOptions(); 		// General Options
+//            break;
+//        case 3:
+//
+//
+//            exit;
+//            break;
+//        default:
+//            $option = getOptions();			// General Options
+//            break;
+//    }
+//
+//}
 
 //ProcessDataDigging();
-
+ProcessDataDigging_Generic();
 
 ?>
