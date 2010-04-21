@@ -167,9 +167,13 @@ function MainBookData(&$output) {
                 fwrite($output, $rowData);
 
             } // End of IF
+
         } // End of FOR
+        $html->__destruct();
+        echo "\n";
+        echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
     }
-    $html->__destruct();
+
 
 
 
@@ -243,8 +247,7 @@ function ProcessDataDigging_Generic() {
     fwrite($output, $row_data);
     MainBookData($output);
 
-    echo "\n";
-    echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
+
 
     fclose($output);
 }
