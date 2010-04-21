@@ -1,7 +1,7 @@
 <?php
 include_once("library/simple_html_dom.php");
 
-Function getAmazonData($SearchPhrase,$RequestType) {
+function getAmazonData($SearchPhrase,$RequestType) {
     include_once("library/amazon/aws_signed_request.php");
 
     $public_key = "AKIAIRPU52XIPOIZS5OA";
@@ -58,7 +58,22 @@ Function getAmazonData($SearchPhrase,$RequestType) {
 
 
 }
+//--------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------
 
+function getTotalPages(&$html) {
+    $totalPages  = $html->find('td[class=pagination]',1);
+    $totalPages = $totalPages->outertext;
+    $totalPages = split("\|", $totalPages);
+    $totalPages = $totalPages[0];
+    $totalPages = split("of", $totalPages);
+    $totalPages = $totalPages[1];
+    $totalPages = split(" ", $totalPages);
+    $totalPages = $totalPages[1];
+     $totalPages =  $totalPages/10 ;
+    return (round($totalPages,0) == $totalPages)?$totalPages:(round($totalPages,0)+1);
+
+}
 function MainBookData(&$output) {
     include_once("library/simple_html_dom.php");
 
@@ -66,15 +81,12 @@ function MainBookData(&$output) {
     $html = file_get_dom($url);
     $html = split("F9.Gk.Hu", $html);
     $html = $html[1];
-    echo $html  = trim($html );
-// After cleaning Data Get the Object
-   // echo $html = str_get_html($html);
+    $html = str_get_html($html);
 
-    //$totalPages  = $html->find('td[class=pagination]');
-    //var_dump($totalPages);
-   // print_r($totalPages);
+    // After cleaning Data Get the Total Pages
+    echo $totalPages = getTotalPages($html);
 
-// $ul  = $html->find('div[id=material_results] ul');
+    //-------------------------------------
 
     $html->__destruct();
 
