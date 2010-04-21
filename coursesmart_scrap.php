@@ -66,12 +66,13 @@ function MainBookData(&$output) {
     $html = file_get_dom($url);
     $html = split("F9.Gk.Hu", $html);
     $html = $html[1];
-    $html  = trim($html );
+    echo $html  = trim($html );
 // After cleaning Data Get the Object
-    $html = str_get_html($html);
-    echo "<code></code"
-   // echo $totalPages  = $html->find('div[id=tabcontents_sr]');
+   // echo $html = str_get_html($html);
+
+    //$totalPages  = $html->find('td[class=pagination]');
     //var_dump($totalPages);
+   // print_r($totalPages);
 
 // $ul  = $html->find('div[id=material_results] ul');
 
@@ -148,8 +149,8 @@ function ProcessDataDigging_Generic() {
     //fwrite($output, $row_data);
 
 
-    echo "\n";
-    echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
+    //echo "\n";
+    //echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
 
     fclose($output);
 }
