@@ -59,7 +59,6 @@ function getAmazonData($SearchPhrase,$RequestType) {
 
 }
 //--------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------
 
 function getTotalPages(&$html) {
     $totalPages  = $html->find('td[class=pagination]',1);
@@ -70,10 +69,11 @@ function getTotalPages(&$html) {
     $totalPages = $totalPages[1];
     $totalPages = split(" ", $totalPages);
     $totalPages = $totalPages[1];
-     $totalPages =  $totalPages/10 ;
+    $totalPages =  $totalPages/10 ;
     return (round($totalPages,0) == $totalPages)?$totalPages:(round($totalPages,0)+1);
 
 }
+//--------------------------------------------------------------------------------------------------------
 function MainBookData(&$output) {
     include_once("library/simple_html_dom.php");
 
@@ -84,11 +84,55 @@ function MainBookData(&$output) {
     $html = str_get_html($html);
 
     // After cleaning Data Get the Total Pages
-    echo $totalPages = getTotalPages($html);
-
+    $totalPages = getTotalPages($html);
     //-------------------------------------
+    // Start looping to get the Data On the Page
+    $bookDataRows  = $html->find('div[id=tabcontents_sr]',0)->find('div[class=page_discipline_search]',0)->children();
+    $bookDataRows  = $bookDataRows[2]->find('div[class=page_discipline_search]',0)->first_child()->children();
+    $bookDataRows  = $bookDataRows[0]->children();
+
+    //echo count($bookDataRows[]);
+    for($i=0; $i< count($bookDataRows);$i++) {
+        if($bookDataRows[$i]->find('div[class=search_booktitle]',0) <> "") {
+            $title  = $bookDataRows[$i]->find('div[class=search_booktitle] a',0)->innertext;
+            $author = $bookDataRows[$i]->find('div[class=info] div',0)->innertext;
+            $author = split("</span>", $author);
+            $author = utf8_decode($author[1]);
+
+            $publisher = $bookDataRows[$i]->find('div[class=info] div',1)->innertext;
+            $publisher = split("Publisher: ", $publisher);
+            $publisher = $publisher[1];
+
+            $copywriteYear = $bookDataRows[$i]->find('div[class=info] div',2)->plaintext;
+            $copywriteYear = split("Copyright Year: ", $copywriteYear);
+            $copywriteYear = $copywriteYear[1];
+
+            $publishingData = $bookDataRows[$i]->find('div[class=info] div',3)->plaintext;
+            $publishingData = split("Publishing Date: ", $publishingData);
+            $publishingData = $publishingData[1];
+
+            // If to check weather which ISBN is available
+            if(count($bookDataRows[$i]->find('table[class=info] div'))== 4){
+                
+            }
+            $ebookISBN_10 = utf8_decode($bookDataRows[$i]->find('table[class=info] div',0)->plaintext);
+            echo ($ebookISBN_10)."<br />";
+
+//            $printISBN_10 =
+//            $ebookISBN_10 =
+//
+//            $printISBN_13 =
+//            $ebookISBN_13 =
+//            $numberOfPages =
+//            $price =
+//            $subscription =
+
+        } // End of IF
+    } // End of FOR
 
     $html->__destruct();
+
+
 
     unset($html);
     unset($ul);
