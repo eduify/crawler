@@ -146,23 +146,23 @@ function MainBookData(&$output) {
 
                 $numberOfPages = $bookDataRows[$i]->find('div[class=info] div',0)->parentNode()->last_child () ;
                 $numberOfPages = split("Pages: ", $numberOfPages);
-                $numberOfPages = $numberOfPages[1];
+                $numberOfPages = strip_tags($numberOfPages[1]);
 
                 $price = $bookDataRows[$i]->find('td[class=formbox] div div',0)->find('div[class=oec]',0)->plaintext ;
                 $price = str_replace("eTextbook ", "", $price);
-               
+
                 $subscription = $bookDataRows[$i]->find('td[class=formbox] div div',0)->find('div[class=sub]',0)->plaintext ;
-                $subscription = str_replace("day subscription)", "", $subscription);
+                $subscription = str_replace(" day subscription)", "", $subscription);
                 $subscription = str_replace("(", "", $subscription);
                 // Row Data
                 if($subscription == "180") {
-                    $subscription_180 == "180";
+                    $subscription_180 = "180";
                 }else if($subscription == "360") {
-                    $subscription_360 == "360";
+                    $subscription_360 = "360";
                 }else if($subscription == "540") {
-                    $subscription_540 == "540";
+                    $subscription_540 = "540";
                 }
-                $rowData = "$title,$author,$publisher,$copywriteYear,$publishingData,$ebookISBN_10,$ebookISBN_13,$printISBN_10,$printISBN_13,$numberOfPages,$price,$subscription_180,$subscription_360,$subscription_540\n";
+                $rowData = "\"$title\",\"$author\",\"$publisher\",\"$copywriteYear\",\"$publishingData\",\"$ebookISBN_10\",\"$ebookISBN_13\",\"$printISBN_10\",\"$printISBN_13\",\"$numberOfPages\",\"$price\",\"$subscription_180\",\"$subscription_360\",\"$subscription_540\"\n";
                 echo $rowData."\n\n";
                 fwrite($output, $rowData);
 
@@ -240,9 +240,8 @@ function ProcessDataDigging_Generic() {
     $output = fopen($file_name, 'w');
     $row_data = "Title,Author,Publisher,Copyright Year,Publishing Date,Digital ISBN 10,Digital ISBN 13,Print ISBN 10,Print ISBN 13,Pages,Price,180 Day Subscription,360 Day Subscription,540 Day Subscription\n";
 
-    MainBookData($output);
     fwrite($output, $row_data);
-
+    MainBookData($output);
 
     echo "\n";
     echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
