@@ -77,7 +77,7 @@ function getTotalPages(&$html) {
 function MainBookData(&$output) {
     include_once("library/simple_html_dom.php");
 
-    $url = "http://www.coursesmart.com/_ajax_searchresultsajax_1_390380?__sugus=191036118&action=2&__version=1.1.1&searchmode=&__className=search&view=book&xmlid=&page=1";
+    $url = "http://www.coursesmart.com/_ajax_searchresultsajax_1_390380?__sugus=191036118&action=2&__version=1.1.1&searchmode=&__className=search&view=book&xmlid=&page=0";
     $html = file_get_dom($url);
     $html = split("F9.Gk.Hu", $html);
     $html = $html[1];
@@ -111,23 +111,44 @@ function MainBookData(&$output) {
             $publishingData = split("Publishing Date: ", $publishingData);
             $publishingData = $publishingData[1];
 
-            // If to check weather which ISBN is available
-            if(count($bookDataRows[$i]->find('table[class=info] div'))== 4){
-                
-            }
-            $ebookISBN_10 = utf8_decode($bookDataRows[$i]->find('table[class=info] div',0)->plaintext);
-            echo ($ebookISBN_10)."<br />";
 
-//            $printISBN_10 =
-//            $ebookISBN_10 =
-//
-//            $printISBN_13 =
-//            $ebookISBN_13 =
-//            $numberOfPages =
-//            $price =
-//            $subscription =
+            $ISBN_obj = ($bookDataRows[$i]->find('table[class=info] div'));
+            for($j=0;$j<count($ISBN_obj);$j++) {
+                if($ISBN_obj[$j]->plaintext <>"") {
+
+                    if( $ISBN_obj[$j]->find('span',0)->plaintext =="eText ISBN-10: ") {
+                        $ebookISBN_10 = utf8_decode($ISBN_obj[$j]->find('span',1)->plaintext);
+                    }
+                    if( $ISBN_obj[$j]->find('span',0)->plaintext =="eText ISBN-13: ") {
+                        $ebookISBN_13 = utf8_decode($ISBN_obj[$j]->find('span',1)->plaintext);
+                    }
+                    if( $ISBN_obj[$j]->find('span',0)->plaintext =="Print ISBN-10: ") {
+                        $printISBN_10 = utf8_decode($ISBN_obj[$j]->find('span',1)->plaintext);
+                    }
+                    if( $ISBN_obj[$j]->find('span',0)->plaintext =="Print ISBN-13: ") {
+                        $printISBN_13 = utf8_decode($ISBN_obj[$j]->find('span',1)->plaintext);
+                    }
+
+                } // this Will Block the Error IF Particular type (isbn 10, 13) Not available
+            } // Loop to Check number All ISB 10, 13 , print, digital
+
+
+            $numberOfPages = $bookDataRows[$i]->find('div[class=info] div',0)->parentNode()->last_child () ;
+            $numberOfPages = split("Pages: ", $numberOfPages);
+            $numberOfPages = $numberOfPages[1]."<br>";
+
+            $price = $bookDataRows[$i]->find('td[class=formbox] div div',0)->find('div[class=oec]',0)->plaintext ;
+            $price = str_replace("eTextbook ", "", $price);
+            $price = $price;
+
+            $subscription = $bookDataRows[$i]->find('td[class=formbox] div div',0)->find('div[class=sub]',0)->plaintext ;
+            $subscription = str_replace("day subscription)", "", $subscription);
+            $subscription = str_replace("(", "", $subscription);
 
         } // End of IF
+        unset($bookDataRows,$title,$author,$publisher,$copywriteYear,$publishingData,$ISBN_obj,$ebookISBN_10,$ebookISBN_13,$printISBN_10,$printISBN_13);
+        unset($numberOfPages,$price,$subscription);
+        
     } // End of FOR
 
     $html->__destruct();
