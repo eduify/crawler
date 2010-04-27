@@ -102,10 +102,16 @@ function MainBookData(&$output) {
         for($i=0; $i< count($bookDataRows);$i++) {
 
             unset($title,$author,$publisher,$copywriteYear,$publishingData,$ISBN_obj,$ebookISBN_10,$ebookISBN_13,$printISBN_10,$printISBN_13);
-            unset($numberOfPages,$price,$courses,$subscription,$subscription_180,$subscription_360,$subscription_540);
+            unset($numberOfPages,$price,$courses,$descriptionPageURL,$AmazonListPrice,$AmazonDiscountPrice,$AmazonDetailPageURL,$subscription,$subscription_180,$subscription_360,$subscription_540);
+             
+                      
+                     
 
             if($bookDataRows[$i]->find('div[class=search_booktitle]',0) <> "") {
                 $title  = $bookDataRows[$i]->find('div[class=search_booktitle] a',0)->innertext;
+                $descriptionPageURL = "http://www.coursesmart.com".$bookDataRows[$i]->find('div[class=search_booktitle] a',0)->getAttribute("href");
+
+
                 $author = $bookDataRows[$i]->find('div[class=info] div',0)->innertext;
                 $author = split("</span>", $author);
                 $author = utf8_decode($author[1]);
@@ -143,14 +149,30 @@ function MainBookData(&$output) {
                     } // this Will Block the Error IF Particular type (isbn 10, 13) Not available
                 } // Loop to Check number All ISB 10, 13 , print, digital
 
+                // ---- Amazon Data Fetching ---------
+                //$amazonISBN = $bookDataRows[$i]->find('div[class=search_booktitle] a',0)->getAttribute("href");
+                //$amazonISBN = str_replace("/","" , $amazonISBN);
 
+                $amazonISBN = str_replace("-", "", $printISBN_13);
+                $amazonISBN = substr($amazonISBN, 0, 13);
+
+                $amazon = getAmazonData("$amazonISBN","ItemLookup");
+                if($amazon) {
+                    $AmazonListPrice = $amazon['AmazonListPrice'] ;
+                    $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
+                    $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
+
+                }
+                 
+                // ---- Amazon Data Fetching Ends---------
                 $numberOfPages = $bookDataRows[$i]->find('div[class=info] div',0)->parentNode()->last_child () ;
                 $numberOfPages = split("Pages: ", $numberOfPages);
                 $numberOfPages = strip_tags($numberOfPages[1]);
 
                 $courses = $bookDataRows[$i]->find('div[class=info] div',0)->parentNode()->last_child ()->prev_sibling ()->plaintext;
                 $courses = str_replace("Course:\n","", $courses);
-                
+                $courses = utf8_decode($courses);
+
                 $price = $bookDataRows[$i]->find('td[class=formbox] div div',0)->find('div[class=oec]',0)->plaintext ;
                 $price = str_replace("eTextbook ", "", $price);
 
@@ -165,7 +187,7 @@ function MainBookData(&$output) {
                 }else if($subscription == "540") {
                     $subscription_540 = "540";
                 }
-                $rowData = "\"$title\",\"$author\",\"$publisher\",\"$copywriteYear\",\"$publishingData\",\"$ebookISBN_10\",\"$ebookISBN_13\",\"$printISBN_10\",\"$printISBN_13\",\"$numberOfPages\",\"$price\",\"$courses\",\"$subscription_180\",\"$subscription_360\",\"$subscription_540\"\n";
+                $rowData = "\"$title\",\"$author\",\"$publisher\",\"$copywriteYear\",\"$publishingData\",\"$ebookISBN_10\",\"$ebookISBN_13\",\"$printISBN_10\",\"$printISBN_13\",\"$numberOfPages\",\"$price\",\"$courses\",\"$descriptionPageURL\",\"$AmazonListPrice\",\"$AmazonDiscountPrice\",\"$AmazonDetailPageURL\",\"$subscription_180\",\"$subscription_360\",\"$subscription_540\"\n";
                 echo $rowData."\n\n";
                 fwrite($output, $rowData);
 
@@ -173,7 +195,7 @@ function MainBookData(&$output) {
 
         } // End of FOR
         $html->__destruct();
-        echo "\n";
+        echo "\n\n";
         echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
     }
 
@@ -245,7 +267,7 @@ function ProcessDataDigging_Generic() {
     }
 
     $output = fopen($file_name, 'w');
-    $row_data = "Title,Author,Publisher,Copyright Year,Publishing Date,Digital ISBN 10,Digital ISBN 13,Print ISBN 10,Print ISBN 13,Pages,Price,Courses,180 Day Subscription,360 Day Subscription,540 Day Subscription\n";
+    $row_data = "Title,Author,Publisher,Copyright Year,Publishing Date,Digital ISBN 10,Digital ISBN 13,Print ISBN 10,Print ISBN 13,Pages,Price,Courses,Description Page URL,Amazon List Price,Amazon Price,Amazon Description Page URL,180 Day Subscription,360 Day Subscription,540 Day Subscription\n";
 
     fwrite($output, $row_data);
     MainBookData($output);
