@@ -102,7 +102,7 @@ function MainBookData(&$output) {
         for($i=0; $i< count($bookDataRows);$i++) {
 
             unset($title,$author,$publisher,$copywriteYear,$publishingData,$ISBN_obj,$ebookISBN_10,$ebookISBN_13,$printISBN_10,$printISBN_13);
-            unset($numberOfPages,$price,$subscription,$subscription_180,$subscription_360,$subscription_540);
+            unset($numberOfPages,$price,$courses,$subscription,$subscription_180,$subscription_360,$subscription_540);
 
             if($bookDataRows[$i]->find('div[class=search_booktitle]',0) <> "") {
                 $title  = $bookDataRows[$i]->find('div[class=search_booktitle] a',0)->innertext;
@@ -148,6 +148,9 @@ function MainBookData(&$output) {
                 $numberOfPages = split("Pages: ", $numberOfPages);
                 $numberOfPages = strip_tags($numberOfPages[1]);
 
+                $courses = $bookDataRows[$i]->find('div[class=info] div',0)->parentNode()->last_child ()->prev_sibling ()->plaintext;
+                $courses = str_replace("Course:\n","", $courses);
+                
                 $price = $bookDataRows[$i]->find('td[class=formbox] div div',0)->find('div[class=oec]',0)->plaintext ;
                 $price = str_replace("eTextbook ", "", $price);
 
@@ -162,7 +165,7 @@ function MainBookData(&$output) {
                 }else if($subscription == "540") {
                     $subscription_540 = "540";
                 }
-                $rowData = "\"$title\",\"$author\",\"$publisher\",\"$copywriteYear\",\"$publishingData\",\"$ebookISBN_10\",\"$ebookISBN_13\",\"$printISBN_10\",\"$printISBN_13\",\"$numberOfPages\",\"$price\",\"$subscription_180\",\"$subscription_360\",\"$subscription_540\"\n";
+                $rowData = "\"$title\",\"$author\",\"$publisher\",\"$copywriteYear\",\"$publishingData\",\"$ebookISBN_10\",\"$ebookISBN_13\",\"$printISBN_10\",\"$printISBN_13\",\"$numberOfPages\",\"$price\",\"$courses\",\"$subscription_180\",\"$subscription_360\",\"$subscription_540\"\n";
                 echo $rowData."\n\n";
                 fwrite($output, $rowData);
 
@@ -242,7 +245,7 @@ function ProcessDataDigging_Generic() {
     }
 
     $output = fopen($file_name, 'w');
-    $row_data = "Title,Author,Publisher,Copyright Year,Publishing Date,Digital ISBN 10,Digital ISBN 13,Print ISBN 10,Print ISBN 13,Pages,Price,180 Day Subscription,360 Day Subscription,540 Day Subscription\n";
+    $row_data = "Title,Author,Publisher,Copyright Year,Publishing Date,Digital ISBN 10,Digital ISBN 13,Print ISBN 10,Print ISBN 13,Pages,Price,Courses,180 Day Subscription,360 Day Subscription,540 Day Subscription\n";
 
     fwrite($output, $row_data);
     MainBookData($output);
