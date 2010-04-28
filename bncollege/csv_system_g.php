@@ -241,20 +241,14 @@ function getOptions() {
 //------------------------------------------------------------------------------------
 function getState() {
 
-    $State_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=STATESUS&pageType=FLGStoreCatalogDisplay&pageSubType=US&langId=-1&demoKey=d&stateUSAIdSelect=");
-    $State_arr = str_replace("<script>parent.doneLoaded('", "", $State_arr);
-    $State_arr = str_replace("')</script>", "", $State_arr);
+    $html = file_get_dom("http://www.bncollege.com/college.aspx");
+    $stateArray = $html->find('select[id=cboStateID] option') ;
+    $totalState = count($stateArray);
 
     $state = array();
-
-    $State_arr = json_decode($State_arr,true);
-    $State_arr = $State_arr['data'][0];
-    
-    foreach($State_arr as $State_Name => $State_Value) {
-        $counter++;
-        $state[$counter] = $State_Value;
-        echo "$counter - $State_Name \n" ;
-
+    for($i=1;$i<$totalState;$i++) {
+        $state[$i] = $stateArray[$i]->getAttribute('value');
+        echo "$i - ".$stateArray[$i]->innertext." \n" ;
     }
     echo "\n\nEnter #(state): Select State\n";
     $selecttion = fgets(STDIN);
@@ -264,84 +258,44 @@ function getState() {
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function getStateUniversity($state) {
-    echo "\n\nPress Enter to Print University List for State $state\n";
-    $selecttion = fgets(STDIN);
+function getSchoolType() {
 
-    $University_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=INSTITUTESUS&pageType=FLGStoreCatalogDisplay&pageSubType=US&langId=-1&demoKey=d&stateProvinceId=$state");
-    $University_arr = str_replace("<script>parent.doneLoaded('", "", $University_arr);
-    $University_arr = str_replace("')</script>", "", $University_arr);
+    $html = file_get_dom("http://www.bncollege.com/college.aspx");
+    $schoolTypeArray = $html->find('select[id=cboCollegeType] option') ;
+    $totalSchoolType = count($schoolTypeArray);
 
-    $University = array();
-    $University_name = array();
-
-    $University_arr = json_decode($University_arr,true);
-    $University_arr = $University_arr['data'][0];
-    foreach($University_arr as $University_Name => $University_Value) {
-        $counter++;
-        $University[$counter] = $University_Value;
-        $University_name[$counter] = $University_Name;
-        echo "$counter - $University_Name \n" ;
-
+    $schoolType = array();
+    for($i=1;$i<$totalSchoolType;$i++) {
+        $schoolType[$i] = $schoolTypeArray[$i]->getAttribute('value');
+        echo "$i - ".$schoolTypeArray[$i]->innertext." \n" ;
     }
-    echo "\n\nEnter #(University): Select University in $state\n";
+    echo "\n\nEnter #(School Type): Select School Type\n";
     $selecttion = fgets(STDIN);
     $selecttion = trim($selecttion); 		// Input from user and save it in a variable
     $selecttion = str_replace("\n", '', $selecttion);
-    $uni[0] = $University[$selecttion];
-    $uni[1] = $University_name[$selecttion];
-
-    return $uni;
-
+    return $schoolType[$selecttion];
 }
 
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function getCampusUniversity($University) {
-    echo "\n\nPress Enter to Print Campus List for University Selected\n";
-    $selecttion = fgets(STDIN);
+function getUniversity($state,$collegeType) {
+    $data = "__VIEWSTATE=dDwtMTc1MzAwNTM2NTs7Pq%2BGnOF4YWQiopXH7fPjhYmOcboy&txtCollegeName=&cboStateID=$state&cboCollegeType=$collegeType&cmdSubmit=Search";
+    $opts = array(
+            'http'=>array(
 
-    $Campus_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?requestType=CAMPUSUS&pageType=FLGStoreCatalogDisplay&pageSubType=US&langId=-1&demoKey=d&institutionId=$University");
-    $Campus_arr = str_replace("<script>parent.doneLoaded('", "", $Campus_arr);
-    $Campus_arr = str_replace("')</script>", "", $Campus_arr);
+                    'method'=>"POST",
+                    'header'=>"User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.9) Gecko/20100315 Firefox/3.5.9\r\n".
+                            "Content-length: " . strlen($data)."\r\n".
+                            "Connection: keep-alive\r\n".
+                            "Accept-Encoding: gzip,deflate\r\n",
+                    'content' => $data));
 
-    $Campus = array();
-    $Campus_name = array();
-
-    $Campus_arr = json_decode($Campus_arr,true);
-    $Campus_arr = $Campus_arr['data'][0];
-    foreach($Campus_arr as $Campus_Name => $Campus_Value) {
-        $counter++;
-        $Campus[$counter] = $Campus_Value;
-        $Campus_name[$counter] = $Campus_Name;
-        echo "$counter - $Campus_Name (Campus)\n" ;
-
-    }
-    echo "\n\nEnter #(Campus): Select Campus in University Selected\n";
-    $selecttion = fgets(STDIN);
-    $selecttion = trim($selecttion); 		// Input from user and save it in a variable
-    $selecttion = str_replace("\n", '', $selecttion);
-    $cam[0] = $Campus[$selecttion];
-    $cam[1] = $Campus_name[$selecttion];
-
-    return $cam;
-
-}
-
-
-function getBK_BOOKS_URL($campus) {
-
-    $Store_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/StoreFinderAJAX?campusId=$campus&requestType=STOREDOMAIN&pageType=FLGStoreCatalogDisplay&langId=-1");
-    $Store_arr = str_replace("<script>parent.doneLoaded('", "", $Store_arr);
-    $Store_arr = str_replace("')</script>", "", $Store_arr);
-
-    $Store = array();
-
-    $Store_arr = json_decode($Store_arr,true);
-    $Store_arr = $Store_arr['data'][0];
-    $Store = $Store_arr[store];
-
-    return $Store;
+    $context = stream_context_create($opts);
+    $fp = fopen("http://www.bncollege.com/college.aspx", 'r',false,$context);
+    $html = fread($fp,2000000);
+    $html = str_get_html($html);
+    return  $html;
+    
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
@@ -553,18 +507,18 @@ while($condition) {
             unset($StoreUrl);
 
             $state = getState();
-            $University = getStateUniversity($state);
-            $Campus = getCampusUniversity($University[0]);
-            $Store = getBK_BOOKS_URL($Campus[0]);
+            $universityType = getSchoolType($state);
+            echo $university = getUniversity($state,$universityType);
+            
 
             $option = getOptions();
             break;
         case 2:
-            if($Store<> "") {
+            if($state<> "" and $universityType<>"") {
                 echo "Processsing File here \n\n\n";
                 //------------------- Start Processing File
-                //ProcessDataDigging($StoreUrl);
-                ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
+
+                // ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
             }
             $option = getOptions(); 		// General Options
             break;
@@ -579,8 +533,6 @@ while($condition) {
     }
 
 }
-
-//ProcessDataDigging();
 
 
 ?>
