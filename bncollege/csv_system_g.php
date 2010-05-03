@@ -299,17 +299,18 @@ function getUniversity($state,$collegeType) {
     if($html->find('table[class=grid]',0)->plaintext <> "") {
 
         $schoolTypeArray = $html->find('table[class=grid] tr');
-                
-         $totalSchoolType = count($schoolTypeArray);
+
+        $totalSchoolType = count($schoolTypeArray);
         $schoolType = array();
         for($i=1;$i<$totalSchoolType;$i++) {
-            $schoolType[$i] = $schoolTypeArray[$i]->find('td', 1)->find('a',0)->getAttribute('href');
+            $schoolType[$i] = str_replace("bkstore", "bncollege", $schoolTypeArray[$i]->find('td', 1)->find('a',0)->getAttribute('href'));
             echo "$i - ".$schoolTypeArray[$i]->find('td', 1)->find('a',0)->innertext." \n" ;
         }
         echo "\n\nEnter #(University): Select University\n";
         $selecttion = fgets(STDIN);
         $selecttion = trim($selecttion); 		// Input from user and save it in a variable
         $selecttion = str_replace("\n", '', $selecttion);
+        $selecttion = str_replace(" ", '', $selecttion);
         return $schoolType[$selecttion];
     }else {
         return false;
@@ -321,11 +322,13 @@ function getUniversity($state,$collegeType) {
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function getUniversityRedirectedURL($url){
+function getUniversityRedirectedURL($url) {
     $html = file_get_dom($url);
     $fullURL = $html->find('meta',0)->getAttribute('content');
-    return $fullURL;
-    
+    $fullURL = str_replace("0;URL=", "", $fullURL);
+    $fullURL = str_replace('"', "", $fullURL);
+    return $url.$fullURL;
+
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
@@ -370,142 +373,115 @@ function checkFile($file_name) {
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-function ProcessDataDigging_Generic($Store, $University_Name,$Campus_Name) {
+function ProcessDataDigging_Generic($universityURL,$finalURL) {
     if(PHP_OS == "WINNT") {
         $file_name = "c:\\$University_Name($Campus_Name).csv";
     }else {
         $file_name = "\\$University_Name($Campus_Name).csv";
     }
 
-    $output = fopen($file_name, 'w');
-    $row_data = "Program,Term,Department,Course,Section,Course URL,Book Title,BK Author,BK Edition,BK Image URL,BK Used Price,BK New Price,BK Digital Price,BK ISBN,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,Detailed Link,Author(s),Edition,Publisher,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi,List Price,You Pay Price\n";
-    fwrite($output, $row_data);
+    //$output = fopen($file_name, 'w');
+    $row_data = "University URL,Term,Department,Course,Section,Course URL,Book Title,BN Author,BN Edition,BN Publisher,BK Used Price,BK New Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi\n";
+    //fwrite($output, $row_data);
 
 
-    $Program_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=INITIAL&storeId=$Store&demoKey=d&_=");
-    $Program_arr = str_replace("<script>parent.doneLoaded('", "", $Program_arr);
-    $Program_arr = str_replace("')</script>", "", $Program_arr);
 
-    $Program_arr = json_decode($Program_arr,true);
-    $Program_arr = $Program_arr['data'][0];
-    foreach($Program_arr as $Program_Name => $Program_Value) {
-        $Program_Name_url = str_replace(" ", "%20", $Program_Name);
-        $term_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=TERMS&storeId=$Store&demoKey=d&programId=$Program_Value&_=");
-        $term_arr = str_replace("<script>parent.doneLoaded('", "", $term_arr);
-        $term_arr = str_replace("')</script>", "", $term_arr);
+    $finalURL = "http://shc.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=44558&catalogId=10001&langId=-1";
+    $universityURL = "http://shc.bncollege.com";
 
-        $term_arr = json_decode($term_arr,true);
-        $term_arr = $term_arr['data'][0];
-        foreach($term_arr as $term_Name => $term_Value) {
-            $term_arr = str_replace(" ", "%20", $term_Name);
-            $Division_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DIVISIONS&storeId=$Store&demoKey=d&programId=$Program_Value&termId=$term_Value&_=");
-            $Division_arr = str_replace("<script>parent.doneLoaded('", "", $Division_arr);
-            $Division_arr = str_replace("')</script>", "", $Division_arr);
+    $html = file_get_dom($finalURL);
+    $campusID = $html->find('input[name=campusId]',0)->getAllAttributes();
+    $campusID  = $campusID['value'];
 
-            $Division_arr = json_decode($Division_arr,true);
-            $Division_arr = $Division_arr['data'][0];
+    $storeID = $html->find('input[name=storeId]',0)->getAllAttributes();
+    $storeID  = $storeID['value'];
 
-            if(!empty($Division_arr)) {
-                foreach($Division_arr as $Division_Name => $Division_Value) {
-                    $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
+    $catalogID = $html->find('input[name=catalogId]',0)->getAllAttributes();
+    $catalogID  = $catalogID['value'];
 
-                    $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=$Store&programId=$Program_Value&termId=$term_Value&divisionName=$Division_Name_url&_=");
-                    $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
-                    $Department_arr = str_replace("')</script>", "", $Department_arr);
+    $langID = $html->find('input[name=langId]',0)->getAllAttributes();
+    $langID  = $langID['value'];
 
-                    $Department_arr = json_decode($Department_arr,true);
-                    $Department_arr = $Department_arr['data'][0];
-                    foreach($Department_arr as $Department_Name => $Department_Value) {
-                        $Department_Name_url = str_replace(" ", "%20", $Department_Name);   // Corrects The URL Data, removes spaces
-
-                        $Course_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=COURSES&storeId=$Store&programId=$Program_Value&termId=$term_Value&divisionName=$Division_Name_url&departmentName=$Department_Name_url&_=");
-                        $Course_arr = str_replace("<script>parent.doneLoaded('", "", $Course_arr);
-                        $Course_arr = str_replace("')</script>", "", $Course_arr);
-
-                        $Course_arr = json_decode($Course_arr,true);
-                        $Course_arr = $Course_arr['data'][0];
-
-                        foreach($Course_arr as $Course_Name => $Course_Value) {
-                            $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
-
-                            $Section_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=SECTIONS&storeId=$Store&programId=$Program_Value&termId=$term_Value&divisionName=$Division_Name_url&departmentName=$Department_Name_url&courseName=$Course_Name_url&_=");
-                            $Section_arr = str_replace("<script>parent.doneLoaded('", "", $Section_arr);
-                            $Section_arr = str_replace("')</script>", "", $Section_arr);
-
-                            $Section_arr = json_decode($Section_arr,true);
-                            $Section_arr = $Section_arr['data'][0];
-                            foreach($Section_arr as $Section_Name => $Section_Value) {
-                                $Section_Name_url = str_replace(" ", "%20", $Section_Name);
-                                // $delay =  rand(3, 5);
-                                //                sleep($delay);
-
-                                $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$Store&langId=-1&programId=$Program_Value&termId=$term_Value&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
-                                $initial_csv_row_data = "$Program_Name,$term_Name,$Division_Name,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
-                                MainBookData($FinalUrl,$initial_csv_row_data,$output);
-
-                                echo "\n";
-                                echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
+    $campus1 = $html->find('input[name=campus1]',0)->getAllAttributes();
+    $campus1  = $langID['value'];
 
 
-                            } // Section
+    $termArray = $html->find('select[name=s2] option');
+    for($i_term=1; $i_term < count($termArray);$i_term++) {
+        $termName = $termArray[$i_term]->innertext;
+        $termName = ltrim($termName);
+        $termName = rtrim($termName);
 
-                        } // Course
+        $termID = $termArray[$i_term]->getAttribute('value');
+        $termID = ltrim($termID);
+        $termID = rtrim($termID);
 
-                    } // Department
+        $deptHTML = file_get_dom("$universityURL/webapp/wcs/stores/servlet/TextBookProcessDropdownsCmd?campusId=$campusID&termId=$termID&deptId=&courseId=&sectionId=&storeId=$storeID&catalogId=$catalogID&langId=-1&dojo.transport=xmlhttp&dojo.preventCache=".rand(1200000000000, 1272882419264));
+        $deptArray = $deptHTML->find('select[name=s3] option');
+        for($i_dept=1; $i_dept < count($deptArray);$i_dept++) {
+            $deptName = $deptArray[$i_dept]->innertext;
+            $deptName = ltrim($deptName);
+            $deptName = rtrim($deptName);
+
+            $deptID = $deptArray[$i_dept]->getAttribute('value');
+            $deptID = ltrim($deptID);
+            $deptID = rtrim($deptID);
+
+            $courseHTML = file_get_dom("$universityURL/webapp/wcs/stores/servlet/TextBookProcessDropdownsCmd?campusId=$campusID&termId=$termID&deptId=$deptID&courseId=&sectionId=&storeId=$storeID&catalogId=$catalogID&langId=-1&dojo.transport=xmlhttp&dojo.preventCache=".rand(1200000000000, 1272882419264));
+            $courseArray = $courseHTML->find('select[name=s4] option');
+            for($i_course=1; $i_course < count($courseArray);$i_course++) {
+                $courseName = $courseArray[$i_course]->innertext;
+                $courseName = ltrim($courseName);
+                $courseName = rtrim($courseName);
+
+                $courseID = $courseArray[$i_course]->getAttribute('value');
+                $courseID = ltrim($courseID);
+                $courseID = rtrim($courseID);
+
+                $sectionHTML = file_get_dom("$universityURL/webapp/wcs/stores/servlet/TextBookProcessDropdownsCmd?campusId=$campusID&termId=$termID&deptId=$deptID&courseId=$courseID&sectionId=&storeId=$storeID&catalogId=$catalogID&langId=-1&dojo.transport=xmlhttp&dojo.preventCache=".rand(1200000000000, 1272882419264));
+                $sectionArray = $sectionHTML->find('select[name=s5] option');
+                for($i_section=1; $i_section < count($sectionArray);$i_section++) {
+                    $sectionName = $sectionArray[$i_section]->innertext;
+                    $sectionName = ltrim($sectionName);
+                    $sectionName = rtrim($sectionName);
+
+                    $sectionID = $sectionArray[$i_section]->getAttribute('value');
+                    $sectionID = ltrim($sectionID);
+                    $sectionID = rtrim($sectionID);
+
+                    $newSection = $sectionID;
+                    $newSection  = str_replace("N_", "", $newSection);
+                    
+                    //---------------------------------------
+                    $data = "storeId=$storeID&langId=$langID&catalogId=$catalogID&savedListAdded=true&clearAll=&viewName=TBWizardView&removeSectionId=&mcEnabled=N&section_1=$newSection&numberOfCoursesAlready=1&viewTextbooks.x=37&viewTextbooks.y=3&sectionList=newSectionNumber";
+                    $opts = array(
+                            'http'=>array(
+
+                                    'method'=>"POST",
+                                    'header'=>"User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.9) Gecko/20100315 Firefox/3.5.9\r\n".
+                                            "Content-length: " . strlen($data)."\r\n".
+                                            "Connection: keep-alive\r\n".
+                                            "Accept-Encoding: gzip,deflate\r\n",
+                                    'content' => $data));
+
+                    $context = stream_context_create($opts);
+                    echo $htmlFinal = file_get_contents("$universityURL/webapp/wcs/stores/servlet/TBListView0", false, $context);
+                    echo "";
+                    exit;
+
+                    //---------------------------------------
+
                 }
-            }else {
-                $Division_Name = " ";
-                $Division_Name_url = str_replace(" ", "%20", $Division_Name);   // Corrects The URL Data, removes spaces
-
-                $Department_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=DEPARTMENTS&storeId=$Store&programId=$Program_Value&termId=$term_Value&divisionName=$Division_Name_url&_=");
-                $Department_arr = str_replace("<script>parent.doneLoaded('", "", $Department_arr);
-                $Department_arr = str_replace("')</script>", "", $Department_arr);
-
-                $Department_arr = json_decode($Department_arr,true);
-                $Department_arr = $Department_arr['data'][0];
-                foreach($Department_arr as $Department_Name => $Department_Value) {
-                    $Department_Name_url = str_replace(" ", "%20", $Department_Name);   // Corrects The URL Data, removes spaces
-
-                    $Course_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=COURSES&storeId=$Store&programId=$Program_Value&termId=$term_Value&divisionName=$Division_Name_url&departmentName=$Department_Name_url&_=");
-                    $Course_arr = str_replace("<script>parent.doneLoaded('", "", $Course_arr);
-                    $Course_arr = str_replace("')</script>", "", $Course_arr);
-
-                    $Course_arr = json_decode($Course_arr,true);
-                    $Course_arr = $Course_arr['data'][0];
-
-                    foreach($Course_arr as $Course_Name => $Course_Value) {
-                        $Course_Name_url = str_replace(" ", "%20", $Course_Name);   // Corrects The URL Data, removes spaces
-
-                        $Section_arr = file_get_contents("http://www.bkstr.com/webapp/wcs/stores/servlet/LocateCourseMaterialsServlet?requestType=SECTIONS&storeId=$Store&programId=$Program_Value&termId=$term_Value&divisionName=$Division_Name_url&departmentName=$Department_Name_url&courseName=$Course_Name_url&_=");
-                        $Section_arr = str_replace("<script>parent.doneLoaded('", "", $Section_arr);
-                        $Section_arr = str_replace("')</script>", "", $Section_arr);
-
-                        $Section_arr = json_decode($Section_arr,true);
-                        $Section_arr = $Section_arr['data'][0];
-                        foreach($Section_arr as $Section_Name => $Section_Value) {
-                            $Section_Name_url = str_replace(" ", "%20", $Section_Name);
-                            // $delay =  rand(3, 5);
-                            //                sleep($delay);
-
-                            $FinalUrl = "http://www.bkstr.com/webapp/wcs/stores/servlet/CourseMaterialsResultsView?catalogId=10001&categoryId=9604&storeId=$Store&langId=-1&programId=$Program_Value&termId=$term_Value&divisionDisplayName=$Division_Name_url&departmentDisplayName=$Department_Name_url&courseDisplayName=$Course_Name_url&sectionDisplayName=$Section_Name_url&demoKey=null&purpose=browse";
-                            $initial_csv_row_data = "$Program_Name,$term_Name,Spring 2010,$Department_Name,$Course_Name,$Section_Name,$FinalUrl";
-                            MainBookData($FinalUrl,$initial_csv_row_data,$output);
-
-                            echo "\n";
-                            echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
-
-
-                        } // Section
-
-                    } // Course
-
-                } // Department
-            } // ELSE to check If Division is Zero
+            }
         }
-
     }
 
-    fclose($output);
+
+
+
+
+
+    //fclose($output);
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
@@ -524,46 +500,47 @@ $Store = "";
 
 
 // --------------------------------------------------
-while($condition) {
-    switch($option) {
-        case "":
-            $option = getOptions();           // General Options
-            break;
-        case 1:
+//while($condition) {
+//    switch($option) {
+//        case "":
+//            $option = getOptions();           // General Options
+//            break;
+//        case 1:
+//
+//            unset($state);
+//            unset($University);
+//            unset($Campus);
+//            unset($StoreUrl);
+//
+//            $state = getState();
+//            $universityType = getSchoolType($state);
+//            $universityURL = getUniversity($state,$universityType);
+//            $finalURL = getUniversityRedirectedURL($universityURL);
+//
+//            $option = getOptions();
+//            break;
+//        case 2:
+//            if($state<> "" and $universityType<>"" and $universityURL) {
+//                echo "Processsing File here \n\n\n";
+//                //------------------- Start Processing File
+//
+//                ProcessDataDigging_Generic($universityURL,$finalURL);
+//            }else {
+//                echo "\n\n University Not Found - Please Select State, School Type, University again \n\n";
+//            }
+//            $option = getOptions(); 		// General Options
+//            break;
+//        case 3:
+//
+//
+//            exit;
+//            break;
+//        default:
+//            $option = getOptions();			// General Options
+//            break;
+//    }
+//
+//}
 
-            unset($state);
-            unset($University);
-            unset($Campus);
-            unset($StoreUrl);
-
-            $state = getState();
-            $universityType = getSchoolType($state);
-            echo $university = getUniversity($state,$universityType);
-
-            $option = getOptions();
-            break;
-        case 2:
-            if($state<> "" and $universityType<>"" and $university) {
-                echo "Processsing File here \n\n\n";
-                //------------------- Start Processing File
-
-                // ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
-            }else{
-                echo "\n\n University Not Found - Please Select State, School Type, University again \n\n";
-            }
-            $option = getOptions(); 		// General Options
-            break;
-        case 3:
-
-
-            exit;
-            break;
-        default:
-            $option = getOptions();			// General Options
-            break;
-    }
-
-}
-
-
+ProcessDataDigging_Generic($universityURL,$finalURL);
 ?>
