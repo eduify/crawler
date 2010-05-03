@@ -1,7 +1,7 @@
 <?php
 include_once("library/simple_html_dom.php");
 
-Function getAmazonData($SearchPhrase,$RequestType) {
+function getAmazonData($SearchPhrase,$RequestType) {
     include_once("library/amazon/aws_signed_request.php");
 
     $public_key = "AKIAIRPU52XIPOIZS5OA";
@@ -294,7 +294,37 @@ function getUniversity($state,$collegeType) {
     $fp = fopen("http://www.bncollege.com/college.aspx", 'r',false,$context);
     $html = fread($fp,2000000);
     $html = str_get_html($html);
-    return  $html;
+
+
+    if($html->find('table[class=grid]',0)->plaintext <> "") {
+
+        $schoolTypeArray = $html->find('table[class=grid] tr');
+                
+         $totalSchoolType = count($schoolTypeArray);
+        $schoolType = array();
+        for($i=1;$i<$totalSchoolType;$i++) {
+            $schoolType[$i] = $schoolTypeArray[$i]->find('td', 1)->find('a',0)->getAttribute('href');
+            echo "$i - ".$schoolTypeArray[$i]->find('td', 1)->find('a',0)->innertext." \n" ;
+        }
+        echo "\n\nEnter #(University): Select University\n";
+        $selecttion = fgets(STDIN);
+        $selecttion = trim($selecttion); 		// Input from user and save it in a variable
+        $selecttion = str_replace("\n", '', $selecttion);
+        return $schoolType[$selecttion];
+    }else {
+        return false;
+    }
+
+
+
+
+}
+//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
+function getUniversityRedirectedURL($url){
+    $html = file_get_dom($url);
+    $fullURL = $html->find('meta',0)->getAttribute('content');
+    return $fullURL;
     
 }
 //------------------------------------------------------------------------------------
@@ -509,16 +539,17 @@ while($condition) {
             $state = getState();
             $universityType = getSchoolType($state);
             echo $university = getUniversity($state,$universityType);
-            
 
             $option = getOptions();
             break;
         case 2:
-            if($state<> "" and $universityType<>"") {
+            if($state<> "" and $universityType<>"" and $university) {
                 echo "Processsing File here \n\n\n";
                 //------------------- Start Processing File
 
                 // ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
+            }else{
+                echo "\n\n University Not Found - Please Select State, School Type, University again \n\n";
             }
             $option = getOptions(); 		// General Options
             break;
