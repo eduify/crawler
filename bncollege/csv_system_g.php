@@ -1,5 +1,6 @@
 <?php
 include_once("library/simple_html_dom.php");
+include_once("library/form_post/php_form_post.php");
 
 function getAmazonData($SearchPhrase,$RequestType) {
     include_once("library/amazon/aws_signed_request.php");
@@ -25,6 +26,8 @@ function getAmazonData($SearchPhrase,$RequestType) {
                 $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
                 $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
                 $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+                $Amazon['AmazonISBN10'] = $pxml->Items->Item->ItemAttributes->ISBN;
+                $Amazon['AmazonISBN13'] = $pxml->Items->Item->ItemAttributes->EAN;
                 return $Amazon;
             } // Else
         }// Else
@@ -48,7 +51,10 @@ function getAmazonData($SearchPhrase,$RequestType) {
                 $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
                 $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
                 $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+                $Amazon['AmazonISBN10'] = $pxml->Items->Item->ItemAttributes->ISBN;
+                $Amazon['AmazonISBN13'] = $pxml->Items->Item->ItemAttributes->EAN;
                 return $Amazon;
+
             } // Else
         }// Else
     }
@@ -58,177 +64,6 @@ function getAmazonData($SearchPhrase,$RequestType) {
 
 
 }
-
-function MainBookData($url,$initial_csv_row_data,&$output) {
-    include_once("library/simple_html_dom.php");
-    $Main_Data = "";
-    $html = file_get_dom($url);
-
-    $ul  = $html->find('div[id=material_results] ul');
-
-    // Header for csv
-
-
-    // CHeck whether Material Exists
-    if($ul != null) {
-        $total_type_books = count($ul);               // Counting type of books
-        for($j=0;$j < $total_type_books; $j++) {
-
-            $all_li = $ul[$j]->find('li');
-            $total_books =  count($all_li); //This will give us Amount of books
-
-            for($i=0;$i<$total_books; $i++) {
-                $BookTitle = $all_li[$i]->find('span[class=wrap]', 0)->plaintext ;
-                $BookTitle = htmlspecialchars_decode($BookTitle);
-
-                $ImageUrl = $all_li[$i]->find('img', 0)->getAttribute("src");
-
-
-
-                if($all_li[$i]->find('div[class=field]', 1)->plaintext != "") {
-                    $BK_UsedPrice = $all_li[$i]->find('div[class=field]', 1)->find('span[class=emph]', 0)->plaintext;
-                }
-
-                if($all_li[$i]->find('div[class=field]', 2)->plaintext != "") {
-                    $BK_NewPrice = $all_li[$i]->find('div[class=field]', 2)->find('span[class=emph]', 0)->plaintext;
-                }
-
-                if($all_li[$i]->find('div[id=field]', 0)->plaintext != "") {
-                    $BK_DigitalPrice = $all_li[$i]->find('div[id=field]', 0)->find('span[class=emph]', 0)->plaintext;
-                }
-
-
-                $AuthorEdition = $all_li[$i]->find('div[class=detail]', 0)->plaintext ;
-                $AuthorEdition = split("Edition", $AuthorEdition);
-
-                // Data Cleaning for Author and Edition
-                $Author = $AuthorEdition[0];
-                $Edition = $AuthorEdition[1];
-                $Author = str_replace("Author:", "", $Author);
-                $Edition = str_replace(":", "", $Edition);
-
-                $Author = str_replace("\n", "", $Author);
-                $Edition = str_replace("\n", "", $Edition);
-
-                $Author = ltrim($Author);
-                $Edition = ltrim($Edition);
-
-                $Author = rtrim($Author);
-                $Author = htmlspecialchars_decode($Author);
-                $Edition = rtrim($Edition);
-
-                // --- Data Cleaning ENDz
-                $SisterUrl_Ancher = $all_li[$i]->find('div[id=field] a', 0);
-                if($SisterUrl_Ancher->plaintext != "") {                                   // Check if Sister URL is available
-                    $SisterUrl = $SisterUrl_Ancher->getAttribute("href") ;
-                    $sister_site_data = SisterSiteData($SisterUrl);
-                } else {
-                    $sister_site_data = ",,,,,,";
-                }
-                if($ImageUrl <> "http://images.efollett.com/books/noBookImage.gif") {  // ONly Access Amazon Api if you image FOund
-                    $Bk_ISBN = split("/", $ImageUrl);
-                    $Bk_ISBN_count = count($Bk_ISBN) -1;
-                    $Bk_ISBN = $Bk_ISBN[$Bk_ISBN_count];
-                    $Bk_ISBN = explode('.', $Bk_ISBN);
-                    $Bk_ISBN = $Bk_ISBN[0];
-                    $amazon = getAmazonData("$Bk_ISBN","ItemLookup");
-                    if($amazon) {
-                        $AmazonListPrice = $amazon['AmazonListPrice'] ;
-                        $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
-                        $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
-                        $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
-                        $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
-
-                    }else {
-                        $amazon = getAmazonData("$BookTitle, $Author, $Edition","ItemSearch");
-                        if($amazon) {
-                            $AmazonListPrice = $amazon['AmazonListPrice'] ;
-                            $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
-                            $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
-                            $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
-                            $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
-
-                        }
-                    }
-
-                }
-                echo $row_data = "$initial_csv_row_data,\"$BookTitle\",\"$Author\",\"$Edition\",$ImageUrl,$BK_UsedPrice,$BK_NewPrice,$BK_DigitalPrice,$Bk_ISBN,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$SisterUrl,$sister_site_data\n";
-                echo "\n";
-
-                fwrite($output, $row_data);
-
-                // Clearing Space
-                unset($BookTitle);
-                unset($SisterUrl);
-                unset($Author);
-                unset($Edition);
-                unset($ImageUrl);
-                unset($BK_UsedPrice);
-                unset($BK_NewPrice);
-                unset($BK_DigitalPrice);
-                unset($Bk_ISBN);
-                unset($row_data);
-
-                unset($amazon);
-                unset($AmazonListPrice) ;
-                unset($NonAmazonNewPrice) ;
-                unset($NonAmazonUsedPrice)  ;
-                unset($AmazonDiscountPrice) ;
-                unset($AmazonDetailPageURL) ;
-
-
-            }// for
-        }
-
-    }else {
-        // If no book is found still add the record
-        echo $row_data = "$initial_csv_row_data,,,,,,,,\n";
-        fwrite($output, $row_data);
-    }
-    $html->__destruct();
-
-    unset($html);
-    unset($ul);
-
-
-}
-//--------------------------------------------------------------------------------------------------------
-function SisterSiteData($sister_url) {
-    include_once("library/simple_html_dom.php");
-    $url = $sister_url;
-    $html = file_get_dom($url);
-    $ListPrice  = $html->find('div[id=bodycenter] table td',0)->children[2]->children[1]->plaintext;
-    $ListPrice = trim($ListPrice);
-
-    $YouPayPrice  = $html->find('div[id=bodycenter] table td',0)->children[2]->children[6]->plaintext;
-    $YouPayPrice = trim($YouPayPrice);
-
-    $Author  = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',0)->children[1]->plaintext;
-    $Author = trim($Author);
-
-    $Edition = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',4)->children[1]->plaintext;
-    $Edition = trim($Edition);
-
-    $Publisher = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',3)->children[1]->plaintext;
-    $Publisher = trim($Publisher);
-
-    $ISBN_10_Print = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',6)->children[1]->plaintext;
-    $ISBN_10_Print = trim($ISBN_10_Print);
-
-    $ISBN_13_Print = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',7)->children[1]->plaintext;
-    $ISBN_13_Print = trim($ISBN_13_Print);
-
-    $ISBN_10_Digital = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',8)->children[1]->plaintext;
-    $ISBN_10_Digital = trim($ISBN_10_Digital);
-
-    $ISBN_13_Digital = $html->find('div[id=bodycenter] table td',0)->children[9]->find('tr',9)->children[1]->plaintext;
-    $ISBN_13_Digital = trim($ISBN_13_Digital);
-
-    $html->__destruct();
-    unset($html);
-    return "\"$Author\",$Edition,\"$Publisher\",$ISBN_10_Print,$ISBN_13_Print,$ISBN_10_Digital,$ISBN_13_Digital,$ListPrice,$YouPayPrice";
-}
-
 //--------------------------------------------------------------------------------------------------------
 function getOptions() {
     echo "\n\nEnter 1: Print List of State \n";
@@ -380,9 +215,9 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
         $file_name = "\\$University_Name($Campus_Name).csv";
     }
 
-    //$output = fopen($file_name, 'w');
-    $row_data = "University URL,Term,Department,Course,Section,Course URL,Book Title,BN Author,BN Edition,BN Publisher,BK Used Price,BK New Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,ISBN (10),ISBN (13),ISBN (10) - Digi,ISBN (13) - Digi\n";
-    //fwrite($output, $row_data);
+    $output = fopen($file_name, 'w');
+    $row_data = "University URL,Term,Department,Course,Section,BN Book Title,BN Author,BN Edition,BN Publisher,BK Used Price,BK New Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,ISBN (10),ISBN (13)\n";
+    fwrite($output, $row_data);
 
 
 
@@ -451,23 +286,67 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
 
                     $newSection = $sectionID;
                     $newSection  = str_replace("N_", "", $newSection);
-                    
                     //---------------------------------------
-                    $data = "storeId=$storeID&langId=$langID&catalogId=$catalogID&savedListAdded=true&clearAll=&viewName=TBWizardView&removeSectionId=&mcEnabled=N&section_1=$newSection&numberOfCoursesAlready=1&viewTextbooks.x=37&viewTextbooks.y=3&sectionList=newSectionNumber";
-                    $opts = array(
-                            'http'=>array(
+                    $data = "storeId=$storeID&langId=$langID&catalogId=$catalogID&savedListAdded=true&clearAll=&viewName=TBWizardView&removeSectionId=&mcEnabled=N&section_1=$newSection&numberOfCourseAlready=1&viewTextbooks.x=37&viewTextbooks.y=3&sectionList=newSectionNumber";
+                    $finalHTML = do_post_request("$universityURL/webapp/wcs/stores/servlet/TBListView",$data);
+                    $finalHTML = str_get_html($finalHTML);
+                    $bookArray = $finalHTML->find("div[id=bookTbl]",0)->children();
+                    for($i_books=0; $i_books < count($bookArray);$i_books++) {
+                        $bookArray_1 = $bookArray[$i_books]->children();
+                        $bookDataPart1 = $bookArray_1[1]->find('table',0)->children();
+                        $bookDataPart2 = $bookArray_1[1]->find('table',1)->children();
+                        //--------------------------------------------------------------------------
+                        $bookTitle = $bookDataPart1[0]->find('a',0)->innertext;
+                        $bookTitle = str_replace(" ", "", $bookTitle);
+                        //--------------------------------------------------------------------------
+                        $bookAuthor = $bookDataPart1[2]->find('span',0)->innertext;
+                        $bookAuthor = str_replace(" ", "", $bookAuthor);
+                        //--------------------------------------------------------------------------
+                        $bookEditionPublisher = $bookDataPart1[4]->find('td',0)->innertext;
+                        $bookEditionPublisher = split("<br />", $bookEditionPublisher);
+                        $bookEdition = $bookEditionPublisher[0];
+                        $bookEdition = str_replace("\n", "", $bookEdition );
+                        $bookEdition = ltrim($bookEdition);
+                        $bookEdition = rtrim($bookEdition);
+                        $bookEdition = str_replace("Edition:", "", $bookEdition );
+                        //--------------------------------------------------------------------------
+                        $bookPublisher = $bookEditionPublisher[1];
+                        $bookPublisher = str_replace("\n", "", $bookPublisher );
+                        $bookPublisher = ltrim($bookPublisher);
+                        $bookPublisher = rtrim($bookPublisher);
+                        $bookPublisher = str_replace("Publisher:", "", $bookPublisher );
+                        //--------------------------------------------------------------------------
+                        $bookUsedPrice = $bookDataPart2[4]->children(2)->find('span',0)->innertext;
+                        $bookUsedPrice = str_replace("\n", "", $bookUsedPrice );
+                        $bookUsedPrice = ltrim($bookUsedPrice);
+                        $bookUsedPrice = rtrim($bookUsedPrice);
+                        //--------------------------------------------------------------------------
+                        $bookNewPrice = $bookDataPart2[6]->children(2)->find('span',0)->innertext;
+                        $bookNewPrice = str_replace("\n", "", $bookNewPrice );
+                        $bookNewPrice = ltrim($bookNewPrice);
+                        $bookNewPrice = rtrim($bookNewPrice);
+                        //--------------------------------------------------------------------------
+                        $amazon = getAmazonData("$bookTitle, $bookAuthor, $bookEdition","ItemSearch");
+                        if($amazon) {
+                            $AmazonListPrice = $amazon['AmazonListPrice'] ;
+                            $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
+                            $NonAmazonNewPrice = $amazon['NonAmazonNewPrice'] ;
+                            $NonAmazonUsedPrice = $amazon['NonAmazonUsedPrice'] ;
+                            $AmazonDetailPageURL = $amazon['AmazonDetailPageURL'] ;
+                            $AmazonISBN10 = $Amazon['AmazonISBN10'];
+                            $AmazonISBN13 = $Amazon['AmazonISBN13'];
 
-                                    'method'=>"POST",
-                                    'header'=>"User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.9) Gecko/20100315 Firefox/3.5.9\r\n".
-                                            "Content-length: " . strlen($data)."\r\n".
-                                            "Connection: keep-alive\r\n".
-                                            "Accept-Encoding: gzip,deflate\r\n",
-                                    'content' => $data));
+                        }
+                        $row_data = "\"$universityURL\",\"$termName\",\"$deptName\",\"$courseName\",\"$sectionName\",\"$bookTitle\",\"$bookAuthor\",\"$bookEdition\",\"$bookPublisher\",\"$bookUsedPrice\",\"$bookNewPrice\",\"$AmazonListPrice\",\"$AmazonDiscountPrice\",\"$NonAmazonNewPrice\",\"$NonAmazonUsedPrice\",\"$AmazonDetailPageURL\",\"$AmazonISBN10\",\"$AmazonISBN13\"\n";
+                        fwrite($output, $row_data);
+                        uset($universityURL,$termName,$termArray,$termID,$deptName,$deptArray,$deptHTML,$deptID,$courseName,$sectionName,$bookTitle,$bookAuthor,$bookEdition,$bookPublisher,$bookUsedPrice,$bookNewPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$AmazonISBN10,$AmazonISBN13);
 
-                    $context = stream_context_create($opts);
-                    echo $htmlFinal = file_get_contents("$universityURL/webapp/wcs/stores/servlet/TBListView0", false, $context);
-                    echo "";
-                    exit;
+                        echo "\n\n";
+                        echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
+                        //--------------------------------------------------------------------------
+
+                    } // main data
+
 
                     //---------------------------------------
 
