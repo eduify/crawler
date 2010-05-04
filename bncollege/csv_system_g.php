@@ -339,28 +339,27 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
                         }
                         $row_data = "\"$universityURL\",\"$termName\",\"$deptName\",\"$courseName\",\"$sectionName\",\"$bookTitle\",\"$bookAuthor\",\"$bookEdition\",\"$bookPublisher\",\"$bookUsedPrice\",\"$bookNewPrice\",\"$AmazonListPrice\",\"$AmazonDiscountPrice\",\"$NonAmazonNewPrice\",\"$NonAmazonUsedPrice\",\"$AmazonDetailPageURL\",\"$AmazonISBN10\",\"$AmazonISBN13\"\n";
                         fwrite($output, $row_data);
-                        uset($universityURL,$termName,$termArray,$termID,$deptName,$deptArray,$deptHTML,$deptID,$courseName,$sectionName,$bookTitle,$bookAuthor,$bookEdition,$bookPublisher,$bookUsedPrice,$bookNewPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$AmazonISBN10,$AmazonISBN13);
+                        uset($universityURL,$termName,$termArray,$termID,$deptName,$deptArray,$deptID,$courseName,$courseArray,$courseID,$sectionName,$sectionID,$sectionArray,$bookTitle,$bookAuthor,$bookEdition,$bookPublisher,$bookUsedPrice,$bookNewPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$AmazonISBN10,$AmazonISBN13);
+                      
 
                         echo "\n\n";
                         echo "Memory Usage  = ".memory_get_usage()/(1024*1024) . "MB  \n\n\n";
                         //--------------------------------------------------------------------------
 
                     } // main data
-
+                    $finalHTML->__destruct();
 
                     //---------------------------------------
 
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-    //fclose($output);
+                }// Section
+                $sectionHTML->__destruct();
+            }// Courses
+            $courseHTML->__destruct();
+        }//dept
+        $deptHTML->__destruct();
+    }//HTML and term
+    $html->__destruct();
+    fclose($output);
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
