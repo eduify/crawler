@@ -339,7 +339,7 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
                         }
                         $row_data = "\"$universityURL\",\"$termName\",\"$deptName\",\"$courseName\",\"$sectionName\",\"$bookTitle\",\"$bookAuthor\",\"$bookEdition\",\"$bookPublisher\",\"$bookUsedPrice\",\"$bookNewPrice\",\"$AmazonListPrice\",\"$AmazonDiscountPrice\",\"$NonAmazonNewPrice\",\"$NonAmazonUsedPrice\",\"$AmazonDetailPageURL\",\"$AmazonISBN10\",\"$AmazonISBN13\"\n";
                         fwrite($output, $row_data);
-                        uset($universityURL,$termName,$termArray,$termID,$deptName,$deptArray,$deptID,$courseName,$courseArray,$courseID,$sectionName,$sectionID,$sectionArray,$bookTitle,$bookAuthor,$bookEdition,$bookPublisher,$bookUsedPrice,$bookNewPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$AmazonISBN10,$AmazonISBN13);
+                        unset($universityURL,$termName,$termArray,$termID,$deptName,$deptArray,$deptID,$courseName,$courseArray,$courseID,$sectionName,$sectionID,$sectionArray,$bookTitle,$bookAuthor,$bookEdition,$bookPublisher,$bookUsedPrice,$bookNewPrice,$AmazonListPrice,$AmazonDiscountPrice,$NonAmazonNewPrice,$NonAmazonUsedPrice,$AmazonDetailPageURL,$AmazonISBN10,$AmazonISBN13);
                       
 
                         echo "\n\n";
@@ -378,47 +378,47 @@ $Store = "";
 
 
 // --------------------------------------------------
-//while($condition) {
-//    switch($option) {
-//        case "":
-//            $option = getOptions();           // General Options
-//            break;
-//        case 1:
-//
-//            unset($state);
-//            unset($University);
-//            unset($Campus);
-//            unset($StoreUrl);
-//
-//            $state = getState();
-//            $universityType = getSchoolType($state);
-//            $universityURL = getUniversity($state,$universityType);
-//            $finalURL = getUniversityRedirectedURL($universityURL);
-//
-//            $option = getOptions();
-//            break;
-//        case 2:
-//            if($state<> "" and $universityType<>"" and $universityURL) {
-//                echo "Processsing File here \n\n\n";
-//                //------------------- Start Processing File
-//
-//                ProcessDataDigging_Generic($universityURL,$finalURL);
-//            }else {
-//                echo "\n\n University Not Found - Please Select State, School Type, University again \n\n";
-//            }
-//            $option = getOptions(); 		// General Options
-//            break;
-//        case 3:
-//
-//
-//            exit;
-//            break;
-//        default:
-//            $option = getOptions();			// General Options
-//            break;
-//    }
-//
-//}
+while($condition) {
+    switch($option) {
+        case "":
+            $option = getOptions();           // General Options
+            break;
+        case 1:
 
-ProcessDataDigging_Generic($universityURL,$finalURL);
+            unset($state);
+            unset($University);
+            unset($Campus);
+            unset($StoreUrl);
+
+            $state = getState();
+            $universityType = getSchoolType($state);
+            $universityURL = getUniversity($state,$universityType);
+            $finalURL = getUniversityRedirectedURL($universityURL);
+
+            $option = getOptions();
+            break;
+        case 2:
+            if($state<> "" and $universityType<>"" and $universityURL) {
+                echo "Processsing File here \n\n\n";
+                //------------------- Start Processing File
+
+                ProcessDataDigging_Generic($universityURL,$finalURL);
+            }else {
+                echo "\n\n University Not Found - Please Select State, School Type, University again \n\n";
+            }
+            $option = getOptions(); 		// General Options
+            break;
+        case 3:
+
+
+            exit;
+            break;
+        default:
+            $option = getOptions();			// General Options
+            break;
+    }
+
+}
+
+
 ?>
