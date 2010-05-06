@@ -114,22 +114,22 @@ function getSchoolType() {
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 function getUniversity($state,$collegeType) {
-    $data = "__VIEWSTATE=dDwtMTc1MzAwNTM2NTs7Pq%2BGnOF4YWQiopXH7fPjhYmOcboy&txtCollegeName=&cboStateID=$state&cboCollegeType=$collegeType&cmdSubmit=Search";
-    $opts = array(
-            'http'=>array(
-
-                    'method'=>"POST",
-                    'header'=>"User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.9) Gecko/20100315 Firefox/3.5.9\r\n".
-                            "Content-length: " . strlen($data)."\r\n".
-                            "Connection: keep-alive\r\n".
-                            "Accept-Encoding: gzip,deflate\r\n",
-                    'content' => $data));
-
-    $context = stream_context_create($opts);
-    $fp = fopen("http://www.bncollege.com/college.aspx", 'r',false,$context);
-    $html = fread($fp,2000000);
+     $data = "__VIEWSTATE=dDwtMTc1MzAwNTM2NTs7Pq%2BGnOF4YWQiopXH7fPjhYmOcboy&txtCollegeName=&cboStateID=$state&cboCollegeType=$collegeType&cmdSubmit=Search";
+//    $opts = array(
+//            'http'=>array(
+//
+//                    'method'=>"POST",
+//                    'header'=>"User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.9) Gecko/20100315 Firefox/3.5.9\r\n".
+//                            "Content-length: " . strlen($data)."\r\n".
+//                            "Connection: keep-alive\r\n".
+//                            "Accept-Encoding: gzip,deflate\r\n",
+//                    'content' => $data));
+//
+//    $context = stream_context_create($opts);
+//    $fp = fopen("http://www.bncollege.com/college.aspx", 'r',false,$context);
+//    $html = fread($fp,2000000);
+    $html = do_post_request("http://www.bncollege.com/college.aspx",$data);
     $html = str_get_html($html);
-
 
     if($html->find('table[class=grid]',0)->plaintext <> "") {
 
@@ -158,6 +158,7 @@ function getUniversity($state,$collegeType) {
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 function getUniversityRedirectedURL($url) {
+    echo $url;
     $html = file_get_dom($url);
     $fullURL = $html->find('meta',0)->getAttribute('content');
     $fullURL = str_replace("0;URL=", "", $fullURL);
@@ -217,7 +218,7 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
     }else {
         $file_name = "\\$uni_filename(bncollege).csv";
     }
-
+    $debugCount =1;
     $output = fopen($file_name, 'w');
     $row_data = "University URL,Term,Department,Course,Section,BN Book Title,BN Author,BN Edition,BN Publisher,BK Used Price,BK New Price,Amazon List Price,Amazon Discount Price,Non Amazon New Price,Non Amazon Used Price,Amazon Detail Page URL,ISBN (10),ISBN (13)\n";
     fwrite($output, $row_data);
@@ -288,6 +289,12 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
                     $data = "storeId=$storeID&langId=$langID&catalogId=$catalogID&savedListAdded=true&clearAll=&viewName=TBWizardView&removeSectionId=&mcEnabled=N&section_1=$newSection&numberOfCourseAlready=1&viewTextbooks.x=37&viewTextbooks.y=3&sectionList=newSectionNumber";
                     $finalHTML = do_post_request("$universityURL/webapp/wcs/stores/servlet/TBListView",$data);
                     $finalHTML = str_get_html($finalHTML);
+//                    if($debugCount < 5198) {
+//                        $debugCount++;
+//                        echo $debugCount."\n";
+//                        continue;
+//
+//                    }
                     $bookArray = $finalHTML->find("div[id=bookTbl]",0)->children();
 
                     for($i_books=0; $i_books < count($bookArray);$i_books++) {
