@@ -1,30 +1,64 @@
 <?php
-include("library/curl_form_post/curl.post.class.php");
-$form =  new CRL();
+function getAmazonData($SearchPhrase,$RequestType) {
+    include_once("library/amazon/aws_signed_request.php");
 
-$form->setURL("http://shc.bncollege.com/webapp/wcs/stores/servlet/TBListView");
+    $public_key = "AKIAIRPU52XIPOIZS5OA";
+    $private_key = "MQUKYscxHYenmyPApVY9NmCi/9+KDC2FxiBeZmgn";
 
-$form->setField('storeId','44558');
-$form->setField('langId','-1');
-$form->setField('catalogId','10001');
-$form->setField('savedListAdded','true');
-$form->setField('clearAll','');
-$form->setField('viewName','TBWizardView');
-$form->setField('removeSectionId','');
-$form->setField('mcEnabled','N');
-$form->setField('section_1','41720354');
-$form->setField('numberOfCoursesAlready','1');
-$form->setField('viewTextbooks.x','66');
-$form->setField('viewTextbooks.y','15');
-$form->setField('sectionList','newSectionNumber');
+    if($RequestType=="ItemLookup") {
+        $pxml = aws_signed_request("com", array("Operation"=>"ItemLookup","SearchIndex"=>"Books", "ItemId"=>"$SearchPhrase","IdType"=>"ISBN","ResponseGroup"=>"Large"), $public_key, $private_key);
+        if ($pxml === False) {
+            return false;
+            // Problem in accessing AMAZON API
 
+        }else {
 
-//setting returned success words
-$form->successWord = 'thank you';
-if($form->init()){
-	echo "Success";
-}else{
-	echo "error";
+            if($pxml->Items->Item->ASIN == "") {
+
+                return false;
+
+            }else {
+                $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
+                $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
+                $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
+                $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+                $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+                $Amazon['AmazonISBN10'] = $pxml->Items->Item->ItemAttributes->ISBN;
+                $Amazon['AmazonISBN13'] = $pxml->Items->Item->ItemAttributes->EAN;
+                return $Amazon;
+            } // Else
+        }// Else
+
+    }else if($RequestType=="ItemSearch") {
+        $pxml = aws_signed_request("com", array("Operation"=>"ItemSearch","SearchIndex"=>"Books","Keywords"=>"$SearchPhrase","ResponseGroup"=>"Large"), $public_key, $private_key);
+
+        if ($pxml === False) {
+           
+            return false;
+            // Problem in accessing AMAZON API
+
+        }else {
+            //var_dump($pxml);
+            if($pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice == "") {
+
+                return false;
+
+            }else {
+                $Amazon['AmazonListPrice'] = $pxml->Items->Item->ItemAttributes->ListPrice->FormattedPrice;
+                $Amazon['NonAmazonNewPrice'] = $pxml->Items->Item->OfferSummary->LowestNewPrice->FormattedPrice;
+                $Amazon['NonAmazonUsedPrice'] = $pxml->Items->Item->OfferSummary->LowestUsedPrice->FormattedPrice;
+                $Amazon['AmazonDiscountPrice'] = $pxml->Items->Item->Offers->Offer->OfferListing->Price->FormattedPrice;
+                $Amazon['AmazonDetailPageURL'] = $pxml->Items->Item->DetailPageURL;
+                $Amazon['AmazonISBN10'] = $pxml->Items->Item->ItemAttributes->ISBN;
+                $Amazon['AmazonISBN13'] = $pxml->Items->Item->ItemAttributes->EAN;
+                return $Amazon;
+
+            } // Else
+        }// Else
+    }
+
 }
+
+ var_dump(getAmazonData("INTERMEDIATE ACCOUNTING,KIESO","ItemSearch"));
 
 ?>

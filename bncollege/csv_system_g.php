@@ -212,7 +212,7 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
     if(PHP_OS == "WINNT") {
         $uni_filename = str_replace("http://", "", $universityURL);
         $uni_filename = str_replace("/", "", $uni_filename);
-        
+
         $file_name = "c:\\$uni_filename(bncollege).csv";
     }else {
         $file_name = "\\$uni_filename(bncollege).csv";
@@ -289,30 +289,36 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
                     $finalHTML = do_post_request("$universityURL/webapp/wcs/stores/servlet/TBListView",$data);
                     $finalHTML = str_get_html($finalHTML);
                     $bookArray = $finalHTML->find("div[id=bookTbl]",0)->children();
-                    
+
                     for($i_books=0; $i_books < count($bookArray);$i_books++) {
                         $bookArray_1 = $bookArray[$i_books]->children();
                         if(count($bookArray_1) == 12) {
                             $bookDataPart1 = $bookArray_1[1]->find('table',0)->children();
-
                             $bookDataPart2 = $bookArray_1[1]->find('table',1)->children();
                             //--------------------------------------------------------------------------
                             $bookTitle = $bookDataPart1[0]->find('a',0)->innertext;
-                            $bookTitle = str_replace(" ", "", $bookTitle);
+                            $bookTitle = utf8_decode($bookTitle);
+                            $bookTitle = ltrim($bookTitle);
+                            $bookTitle = rtrim($bookTitle);
+                            $bookTitle = htmlspecialchars_decode($bookTitle, ENT_QUOTES);
                             //--------------------------------------------------------------------------
                             $bookAuthor = $bookDataPart1[2]->find('span',0)->innertext;
-                            $bookAuthor = str_replace(" ", "", $bookAuthor);
+                            $bookAuthor = ltrim($bookAuthor);
+                            $bookAuthor = rtrim($bookAuthor);
+                            $bookAuthor = htmlspecialchars_decode($bookAuthor, ENT_QUOTES);
                             //--------------------------------------------------------------------------
                             $bookEditionPublisher = $bookDataPart1[4]->find('td',0)->innertext;
                             $bookEditionPublisher = split("<br />", $bookEditionPublisher);
                             $bookEdition = $bookEditionPublisher[0];
                             $bookEdition = str_replace("\n", "", $bookEdition );
+                            $bookEdition = utf8_decode($bookEdition);
                             $bookEdition = ltrim($bookEdition);
                             $bookEdition = rtrim($bookEdition);
                             $bookEdition = str_replace("Edition:", "", $bookEdition );
                             //--------------------------------------------------------------------------
                             $bookPublisher = $bookEditionPublisher[1];
                             $bookPublisher = str_replace("\n", "", $bookPublisher );
+                            $bookPublisher = utf8_decode($bookPublisher);
                             $bookPublisher = ltrim($bookPublisher);
                             $bookPublisher = rtrim($bookPublisher);
                             $bookPublisher = str_replace("Publisher:", "", $bookPublisher );
@@ -327,7 +333,7 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
                             $bookNewPrice = ltrim($bookNewPrice);
                             $bookNewPrice = rtrim($bookNewPrice);
                             //--------------------------------------------------------------------------
-                            $amazon = getAmazonData("$bookTitle, $bookAuthor, $bookEdition","ItemSearch");
+                            $amazon = getAmazonData("$bookTitle,$bookAuthor","ItemSearch");
                             if($amazon) {
                                 $AmazonListPrice = $amazon['AmazonListPrice'] ;
                                 $AmazonDiscountPrice = $amazon['AmazonDiscountPrice'] ;
@@ -368,7 +374,6 @@ function ProcessDataDigging_Generic($universityURL,$finalURL) {
 }
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
-
 
 
 
