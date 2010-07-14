@@ -1,0 +1,6 @@
+-------------------------------------------------------------------------------
+COURSEMART SCRAPPER
+
+1. Get the code form GITHUB
+2. Change the branch to coursemart
+3. From command line run php "/path/to/coursemart/git-repo/coursemart.php"
