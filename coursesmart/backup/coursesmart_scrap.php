@@ -88,6 +88,7 @@ function MainBookData(&$output) {
     $html->__destruct();
     //-------------------------------------
     for($k=0;$k<$totalPages;$k++) {
+        
         $url = "http://www.coursesmart.com/_ajax_searchresultsajax_1_390380?__sugus=191036118&action=2&__version=1.1.1&searchmode=&__className=search&view=book&xmlid=&page=$k";
         $html = file_get_dom($url);
         $html = split("F9.Gk.Hu", $html);
