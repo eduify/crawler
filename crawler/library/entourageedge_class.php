@@ -236,39 +236,5 @@ class entourageedge {
 //------------------------------------------------------------------------------------
 }
 
-// ----------- Varibales Initilization --------------
-//$condition = true;
-//$option = "";
-//$file_name = "";
-// --------------------------------------------------
-//while($condition) {
-//    switch($option) {
-//        case "":
-//            $option = getOptions();           // General Options
-//            break;
-//        case 1:
-//
-//            $option = getOptions();
-//            break;
-//        case 2:
-//            if($Store<> "") {
-//                echo "Processsing File here \n\n\n";
-//                //------------------- Start Processing File
-//
-//               // ProcessDataDigging_Generic($Store,$University[1],$Campus[1]);
-//            }
-//            $option = getOptions(); 		// General Options
-//            break;
-//        case 3:
-//
-//
-//            exit;
-//            break;
-//        default:
-//            $option = getOptions();			// General Options
-//            break;
-//    }
-//
-//}
-//ProcessDataDigging();
+
 ?>
